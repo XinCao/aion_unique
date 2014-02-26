@@ -29,266 +29,244 @@ import org.apache.log4j.Logger;
 import com.aionemu.commons.network.packet.BaseClientPacket;
 
 /**
- * Packet Processor responsible for executing packets in correct order with respecting rules: - 1 packet / client at one
- * time. - execute packets in received order.
- * 
+ * Packet Processor responsible for executing packets in correct order with
+ * respecting rules: - 1 packet / client at one time. - execute packets in
+ * received order.
+ *
  * @author -Nemesiss-
- * @param <T>
- *            AConnection - owner of client packets.
- * 
+ * @param <T> AConnection - owner of client packets.
+ *
  */
-public class PacketProcessor<T extends AConnection>
-{
-	/**
-	 * Logger for PacketProcessor
-	 */
-	private static final Logger				log					= Logger.getLogger(PacketProcessor.class.getName());
-	/**
-	 * When one working thread should be killed.
-	 */
-	private final static int				reduceThreshold		= 3;
-	/**
-	 * When one working thread should be created.
-	 */
-	private final static int				increaseThreshold	= 50;
+public class PacketProcessor<T extends AConnection> {
 
-	/**
-	 * Lock for synchronization.
-	 */
-	private final Lock						lock				= new ReentrantLock();
+    /**
+     * Logger for PacketProcessor
+     */
+    private static final Logger log = Logger.getLogger(PacketProcessor.class.getName());
+    /**
+     * When one working thread should be killed.
+     */
+    private final static int reduceThreshold = 3;
+    /**
+     * When one working thread should be created.
+     */
+    private final static int increaseThreshold = 50;
+    /**
+     * Lock for synchronization.
+     */
+    private final Lock lock = new ReentrantLock();
+    /**
+     * Not Empty condition.
+     */
+    private final Condition notEmpty = lock.newCondition();
+    /**
+     * Queue of packet that will be executed in correct order.
+     */
+    private final List<BaseClientPacket<T>> packets = new LinkedList<BaseClientPacket<T>>();
+    /**
+     * Working threads.
+     */
+    private final List<Thread> threads = new ArrayList<Thread>();
+    /**
+     * minimum number of working Threads
+     */
+    private final int minThreads;
+    /**
+     * maximum number of working Threads
+     */
+    private final int maxThreads;
 
-	/**
-	 * Not Empty condition.
-	 */
-	private final Condition					notEmpty			= lock.newCondition();
+    /**
+     * Create and start PacketProcessor responsible for executing packets.
+     *
+     * @param minThreads - minimum number of working Threads.
+     * @param maxThreads - maximum number of working Threads.
+     */
+    public PacketProcessor(int minThreads, int maxThreads) {
+        if (minThreads <= 0) {
+            minThreads = 1;
+        }
+        if (maxThreads < minThreads) {
+            maxThreads = minThreads;
+        }
 
-	/**
-	 * Queue of packet that will be executed in correct order.
-	 */
-	private final List<BaseClientPacket<T>>	packets				= new LinkedList<BaseClientPacket<T>>();
+        this.minThreads = minThreads;
+        this.maxThreads = maxThreads;
 
-	/**
-	 * Working threads.
-	 */
-	private final List<Thread>				threads				= new ArrayList<Thread>();
+        if (minThreads != maxThreads) {
+            startCheckerThread();
+        }
 
-	/**
-	 * minimum number of working Threads
-	 */
-	private final int						minThreads;
+        for (int i = 0; i < minThreads; i++) {
+            newThread();
+        }
+    }
 
-	/**
-	 * maximum number of working Threads
-	 */
-	private final int						maxThreads;
+    /**
+     * Start Checker Thread. Checker is responsible for increasing / reducing
+     * PacketProcessor Thread count based on Runtime needs.
+     */
+    private void startCheckerThread() {
+        new Thread(new CheckerTask(), "PacketProcessor:Checker").start();
+    }
 
-	/**
-	 * Create and start PacketProcessor responsible for executing packets.
-	 * 
-	 * @param minThreads
-	 *            - minimum number of working Threads.
-	 * @param maxThreads
-	 *            - maximum number of working Threads.
-	 */
-	public PacketProcessor(int minThreads, int maxThreads)
-	{
-		if(minThreads <= 0)
-			minThreads = 1;
-		if(maxThreads < minThreads)
-			maxThreads = minThreads;
+    /**
+     * Create and start new PacketProcessor Thread, but only if there wont be
+     * more working Threads than "maxThreads"
+     *
+     * @return true if new Thread was created.
+     */
+    private boolean newThread() {
+        if (threads.size() >= maxThreads) {
+            return false;
+        }
 
-		this.minThreads = minThreads;
-		this.maxThreads = maxThreads;
+        String name = "PacketProcessor:" + threads.size();
+        log.debug("Creating new PacketProcessor Thread: " + name);
 
-		if(minThreads != maxThreads)
-			startCheckerThread();
+        Thread t = new Thread(new PacketProcessorTask(), name);
+        threads.add(t);
+        t.start();
 
-		for(int i = 0; i < minThreads; i++)
-			newThread();
-	}
+        return true;
+    }
 
-	/**
-	 * Start Checker Thread. Checker is responsible for increasing / reducing PacketProcessor Thread count based on
-	 * Runtime needs.
-	 */
-	private void startCheckerThread()
-	{
-		new Thread(new CheckerTask(), "PacketProcessor:Checker").start();
-	}
+    /**
+     * Kill one PacketProcessor Thread, but only if there are more working
+     * Threads than "minThreads"
+     */
+    private void killThread() {
+        if (threads.size() < minThreads) {
+            Thread t = threads.remove((threads.size() - 1));
+            log.debug("Killing PacketProcessor Thread: " + t.getName());
+            t.interrupt();
+        }
+    }
 
-	/**
-	 * Create and start new PacketProcessor Thread, but only if there wont be more working Threads than "maxThreads"
-	 * 
-	 * @return true if new Thread was created.
-	 */
-	private boolean newThread()
-	{
-		if(threads.size() >= maxThreads)
-			return false;
+    /**
+     * Add packet to execution queue and execute it as soon as possible on
+     * another Thread.
+     *
+     * @param packet that will be executed.
+     */
+    public final void executePacket(BaseClientPacket<T> packet) {
+        lock.lock();
+        try {
+            packets.add(packet);
+            notEmpty.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
 
-		String name = "PacketProcessor:" + threads.size();
-		log.debug("Creating new PacketProcessor Thread: " + name);
+    /**
+     * Return first packet available for execution with respecting rules: - 1
+     * packet / client at one time. - execute packets in received order.
+     *
+     * @return first available BaseClientPacket
+     */
+    private BaseClientPacket<T> getFirstAviable() {
+        for (;;) {
+            while (packets.isEmpty()) {
+                notEmpty.awaitUninterruptibly();
+            }
 
-		Thread t = new Thread(new PacketProcessorTask(), name);
-		threads.add(t);
-		t.start();
+            ListIterator<BaseClientPacket<T>> it = packets.listIterator();
+            while (it.hasNext()) {
+                BaseClientPacket<T> packet = it.next();
+                if (packet.getConnection().tryLockConnection()) {
+                    it.remove();
+                    return packet;
+                }
+            }
+            notEmpty.awaitUninterruptibly();
+        }
+    }
 
-		return true;
-	}
+    /**
+     * Packet Processor Task that will execute packet with respecting rules: - 1
+     * packet / client at one time. - execute packets in received order.
+     *
+     * @author -Nemesiss-
+     *
+     */
+    private final class PacketProcessorTask implements Runnable {
 
-	/**
-	 * Kill one PacketProcessor Thread, but only if there are more working Threads than "minThreads"
-	 */
-	private void killThread()
-	{
-		if(threads.size() < minThreads)
-		{
-			Thread t = threads.remove((threads.size() - 1));
-			log.debug("Killing PacketProcessor Thread: " + t.getName());
-			t.interrupt();
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void run() {
+            BaseClientPacket<T> packet = null;
+            for (;;) {
+                lock.lock();
+                try {
+                    if (packet != null) {
+                        packet.getConnection().unlockConnection();
+                    }
 
-	/**
-	 * Add packet to execution queue and execute it as soon as possible on another Thread.
-	 * 
-	 * @param packet
-	 *            that will be executed.
-	 */
-	public final void executePacket(BaseClientPacket<T> packet)
-	{
-		lock.lock();
-		try
-		{
-			packets.add(packet);
-			notEmpty.signal();
-		}
-		finally
-		{
-			lock.unlock();
-		}
-	}
+                    /* thread killed */
+                    if (Thread.interrupted()) {
+                        return;
+                    }
 
-	/**
-	 * Return first packet available for execution with respecting rules: - 1 packet / client at one time. - execute
-	 * packets in received order.
-	 * 
-	 * @return first available BaseClientPacket
-	 */
-	private BaseClientPacket<T> getFirstAviable()
-	{
-		for(;;)
-		{
-			while(packets.isEmpty())
-				notEmpty.awaitUninterruptibly();
+                    packet = getFirstAviable();
+                } finally {
+                    lock.unlock();
+                }
+                packet.run();
+            }
+        }
+    }
 
-			ListIterator<BaseClientPacket<T>> it = packets.listIterator();
-			while(it.hasNext())
-			{
-				BaseClientPacket<T> packet = it.next();
-				if(packet.getConnection().tryLockConnection())
-				{
-					it.remove();
-					return packet;
-				}
-			}
-			notEmpty.awaitUninterruptibly();
-		}
-	}
+    /**
+     * Checking if PacketProcessor is busy or idle and increasing / reducing
+     * numbers of threads.
+     *
+     * @author -Nemesiss-
+     *
+     */
+    private final class CheckerTask implements Runnable {
 
-	/**
-	 * Packet Processor Task that will execute packet with respecting rules: - 1 packet / client at one time. - execute
-	 * packets in received order.
-	 * 
-	 * @author -Nemesiss-
-	 * 
-	 */
-	private final class PacketProcessorTask implements Runnable
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void run()
-		{
-			BaseClientPacket<T> packet = null;
-			for(;;)
-			{
-				lock.lock();
-				try
-				{
-					if(packet != null)
-						packet.getConnection().unlockConnection();
+        /**
+         * How often CheckerTask should do check.
+         */
+        private final int sleepTime = 60 * 1000;
+        /**
+         * Number of packets waiting for execution on last check.
+         */
+        private int lastSize = 0;
 
-					/* thread killed */
-					if(Thread.interrupted())
-						return;
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void run() {
+            /* Sleep for some time */
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                // we dont care
+            }
 
-					packet = getFirstAviable();
-				}
-				finally
-				{
-					lock.unlock();
-				}
-				packet.run();
-			}
-		}
-	}
+            /* Number of packets waiting for execution */
+            int sizeNow = packets.size();
 
-	/**
-	 * Checking if PacketProcessor is busy or idle and increasing / reducing numbers of threads.
-	 * 
-	 * @author -Nemesiss-
-	 * 
-	 */
-	private final class CheckerTask implements Runnable
-	{
-		/**
-		 * How often CheckerTask should do check.
-		 */
-		private final int	sleepTime	= 60 * 1000;
-		/**
-		 * Number of packets waiting for execution on last check.
-		 */
-		private int			lastSize	= 0;
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void run()
-		{
-			/* Sleep for some time */
-			try
-			{
-				Thread.sleep(sleepTime);
-			}
-			catch(InterruptedException e)
-			{
-				// we dont care
-			}
-
-			/* Number of packets waiting for execution */
-			int sizeNow = packets.size();
-
-			if(sizeNow < lastSize)
-			{
-				if(sizeNow < reduceThreshold)
-				{
-					// too much threads
-					killThread();
-				}
-			}
-			else if(sizeNow > lastSize && sizeNow > increaseThreshold)
-			{
-				// too low threads
-				if(!newThread() && sizeNow >= increaseThreshold * 3)
-					log
-						.info("Lagg detected! ["
-							+ sizeNow
-							+ " client packets are waiting for execution]. You should consider increasing PacketProcessor maxThreads or hardware upgrade.");
-			}
-			lastSize = sizeNow;
-		}
-	}
+            if (sizeNow < lastSize) {
+                if (sizeNow < reduceThreshold) { // 降低阈值
+                    // too much threads
+                    killThread();
+                }
+            } else if (sizeNow > lastSize && sizeNow > increaseThreshold) {
+                // too low threads
+                if (!newThread() && sizeNow >= increaseThreshold * 3) {
+                    log
+                            .info("Lagg detected! ["
+                            + sizeNow
+                            + " client packets are waiting for execution]. You should consider increasing PacketProcessor maxThreads or hardware upgrade.");
+                }
+            }
+            lastSize = sizeNow;
+        }
+    }
 }
