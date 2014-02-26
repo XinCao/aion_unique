@@ -14,138 +14,114 @@
  * You should have received a copy of the GNU General Public License
  * along with aion-emu.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.aionemu.gameserver.model;
 
 /**
- * 
+ *
  * Chat types that are supported by aion.
- * 
+ *
  * @author SoulKeeper
  */
-public enum ChatType
-{
+public enum ChatType {
 
-	/**
-	 * Normal chat (white)
-	 */
-	NORMAL(0x00),
+    /**
+     * Normal chat (white)
+     */
+    NORMAL(0x00),
+    /**
+     * Shout chat (orange)
+     */
+    SHOUT(0x03),
+    /**
+     * Whisper chat (green)
+     */
+    WHISPER(0x04),
+    /**
+     * Group chat (blue)
+     */
+    GROUP(0x05),
+    /**
+     * Group Leader chat
+     */
+    GROUP_LEADER(0x07),
+    /**
+     * Legion chat (green)
+     */
+    LEGION(0x08),
+    /**
+     * Unknown
+     */
+    UNKNOWN_0x18(0x18),
+    /**
+     * Announce chat (yellow)
+     */
+    ANNOUNCEMENTS(0x19, true),
+    /**
+     * Periodically Notice chat (white)
+     */
+    PERIOD_NOTICE(0x1C, true),
+    /**
+     * Periodically Announce chat (yellow)
+     */
+    PERIOD_ANNOUNCEMENTS(0x20, true),
+    /**
+     * Notice chat (yellow with box over players head)
+     */
+    SYSTEM_NOTICE(0x21, true);
+    /**
+     * Chat type storage
+     */
+    private final int intValue;
+    /**
+     * Check whether all races can read chat
+     */
+    private boolean sysMsg;
 
-	/**
-	 * Shout chat (orange)
-	 */
-	SHOUT(0x03),
+    /**
+     * Constructor
+     *
+     * @param intValue client chat type integer representation
+     */
+    private ChatType(int intValue) {
+        this(intValue, false);
+    }
 
-	/**
-	 * Whisper chat (green)
-	 */
-	WHISPER(0x04),
+    /**
+     * Converts ChatType value to integer representation
+     *
+     * @return chat type in client
+     */
+    public int toInteger() {
+        return intValue;
+    }
 
-	/**
-	 * Group chat (blue)
-	 */
-	GROUP(0x05),
+    /**
+     * Returns ChatType by it's integer representation
+     *
+     * @param integerValue integer value of chat type
+     * @return ChatType
+     * @throws IllegalArgumentException if can't find suitable chat type
+     */
+    public static ChatType getChatTypeByInt(int integerValue) throws IllegalArgumentException {
+        for (ChatType ct : ChatType.values()) {
+            if (ct.toInteger() == integerValue) {
+                return ct;
+            }
+        }
 
-	/**
-	 * Group Leader chat
-	 */
-	GROUP_LEADER(0x07),
+        throw new IllegalArgumentException("Unsupported chat type: " + integerValue);
+    }
 
-	/**
-	 * Legion chat (green)
-	 */
-	LEGION(0x08),
+    private ChatType(int intValue, boolean sysMsg) {
+        this.intValue = intValue;
+        this.sysMsg = sysMsg;
+    }
 
-	/**
-	 * Unknown
-	 */
-	UNKNOWN_0x18(0x18),
-
-	/**
-	 * Announce chat (yellow)
-	 */
-	ANNOUNCEMENTS(0x19, true),
-
-	/**
-	 * Periodically Notice chat (white)
-	 */
-	PERIOD_NOTICE(0x1C, true),
-
-	/**
-	 * Periodically Announce chat (yellow)
-	 */
-	PERIOD_ANNOUNCEMENTS(0x20, true),
-
-	/**
-	 * Notice chat (yellow with box over players head)
-	 */
-	SYSTEM_NOTICE(0x21, true);
-
-	/**
-	 * Chat type storage
-	 */
-	private final int	intValue;
-
-	/**
-	 * Check whether all races can read chat
-	 */
-	private boolean	sysMsg;
-
-	/**
-	 * Constructor
-	 * 
-	 * @param intValue
-	 *            client chat type integer representation
-	 */
-	private ChatType(int intValue)
-	{
-		this(intValue, false);
-	}
-
-	/**
-	 * Converts ChatType value to integer representation
-	 * 
-	 * @return chat type in client
-	 */
-	public int toInteger()
-	{
-		return intValue;
-	}
-
-	/**
-	 * Returns ChatType by it's integer representation
-	 * 
-	 * @param integerValue
-	 *            integer value of chat type
-	 * @return ChatType
-	 * @throws IllegalArgumentException
-	 *             if can't find suitable chat type
-	 */
-	public static ChatType getChatTypeByInt(int integerValue) throws IllegalArgumentException
-	{
-		for(ChatType ct : ChatType.values())
-		{
-			if(ct.toInteger() == integerValue)
-			{
-				return ct;
-			}
-		}
-
-		throw new IllegalArgumentException("Unsupported chat type: " + integerValue);
-	}
-
-	private ChatType(int intValue, boolean sysMsg)
-	{
-		this.intValue = intValue;
-		this.sysMsg = sysMsg;
-	}
-
-	/**
-	 * 
-	 * @return true if this is one of system message ( all races can read chat )
-	 */
-	public boolean isSysMsg()
-	{
-		return sysMsg;
-	}
+    /**
+     *
+     * @return true if this is one of system message ( all races can read chat )
+     */
+    public boolean isSysMsg() {
+        return sysMsg;
+    }
 }

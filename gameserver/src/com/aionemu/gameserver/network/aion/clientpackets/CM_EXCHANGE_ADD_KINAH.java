@@ -22,40 +22,36 @@ import com.aionemu.gameserver.services.ExchangeService;
 import com.google.inject.Inject;
 
 /**
- * 
+ *
  * @author Avol
- * 
+ *
  */
-public class CM_EXCHANGE_ADD_KINAH extends AionClientPacket
-{
-	public int unk;
-	public int itemCount;
+public class CM_EXCHANGE_ADD_KINAH extends AionClientPacket {
 
-	@Inject
-	private ExchangeService exchangeService;
+    public int unk;
+    public int itemCount;
+    @Inject
+    private ExchangeService exchangeService;
 
-	public CM_EXCHANGE_ADD_KINAH(int opcode)
-	{
-		super(opcode);
-	}
+    public CM_EXCHANGE_ADD_KINAH(int opcode) {
+        super(opcode);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void readImpl()
-	{
-		itemCount = readD();
-		unk = readD();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void readImpl() {
+        itemCount = readD();
+        unk = readD();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void runImpl()
-	{
-		final Player activePlayer = getConnection().getActivePlayer();		
-		exchangeService.addKinah(activePlayer, itemCount);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void runImpl() {
+        final Player activePlayer = getConnection().getActivePlayer();
+        exchangeService.addKinah(activePlayer, itemCount);
+    }
 }

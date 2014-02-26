@@ -1,1 +1,0 @@
- CREATE INDEX mailRecipientId ON mail(mailRecipientId);
