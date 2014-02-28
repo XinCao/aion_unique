@@ -1,0 +1,43 @@
+[INFO] 2014-02-28 10:06:21 - com.aionemu.loginserver.configs.Config:105 - Loading: ./config/network/network.properties
+[INFO] 2014-02-28 10:06:21 - com.aionemu.loginserver.configs.Config:106 - Loading: ./config/network/database.properties
+[INFO] 2014-02-28 10:06:22 - com.aionemu.commons.database.DatabaseFactory:133 - Successfully connected to database
+[INFO] 2014-02-28 10:06:27 - com.aionemu.commons.database.dao.DAOManager:70 - Loaded 4 DAO implementations.
+[INFO] 2014-02-28 10:06:28 - com.aionemu.loginserver.network.ncrypt.KeyGen:60 - Initializing Key Generator...
+[INFO] 2014-02-28 10:06:32 - com.aionemu.loginserver.GameServerTable:68 - GameServerTable loaded 0 registered GameServers.
+[INFO] 2014-02-28 10:06:32 - com.aionemu.loginserver.controller.BannedIpController:63 - BannedIpController loaded 0 IP bans.
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.network.NioServer:120 - Server listening on all available IPs on Port 9014 for Gs Connections
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.network.NioServer:120 - Server listening on all available IPs on Port 2106 for Aion Connections
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:126 - OS: Windows Vista Build: 6.1
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:126 - OS Arch: x86
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:126 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:126 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:120 - Avaible CPU(s): 2
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:120 - Processor(s) Identifier: Intel64 Family 6 Model 23 Stepping 10, GenuineIntel
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:120 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:120 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:132 - Java Platform Information
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:132 - Java Runtime  Name: Java(TM) SE Runtime Environment
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:132 - Java Version: 1.6.0_10-rc2
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:132 - Java Class Version: 50.0
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:132 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:132 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - Virtual Machine Information (JVM)
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - JVM Name: Java HotSpot(TM) Client VM
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - JVM installation directory: C:\Program Files (x86)\Java\jdk1.6.0_10\jre
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - JVM version: 11.0-b15
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - JVM Vendor: Sun Microsystems Inc.
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - JVM Info: mixed mode, sharing
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:138 - ..................................................
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - +----
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - | Global Memory Informations at 10:06:32:
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - |    |
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - | Allowed Memory: 65088 KB
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - |    |= Allocated Memory: 9276 KB (14.2515%)
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - |    |= Non-Allocated Memory: 55812 KB (85.7485%)
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - | Allocated Memory: 9276 KB
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - |    |= Used Memory: 5764 KB (8.8557%)
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - |    |= Unused (cached) Memory: 3512 KB (5.3958%)
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - | Useable Memory: 59324 KB (91.1443%)
+[INFO] 2014-02-28 10:06:32 - com.aionemu.commons.utils.AEInfos:114 - +----
+[INFO] 2014-02-28 10:06:32 - com.aionemu.loginserver.LoginServer:94 - AE Login Server started in 11 seconds.

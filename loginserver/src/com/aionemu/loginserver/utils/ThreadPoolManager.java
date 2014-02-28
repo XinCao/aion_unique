@@ -65,20 +65,14 @@ public class ThreadPoolManager implements DisconnectionThreadPool {
     /**
      * Constructor.
      */
-//    private ThreadPoolManager() {
-//        scheduledThreadPool = new ScheduledThreadPoolExecutorAE(4, new PriorityThreadFactory("ScheduledThreadPool",
-//                Thread.NORM_PRIORITY));
+    private ThreadPoolManager() {
+        scheduledThreadPool = new ScheduledThreadPoolExecutorAE(4, new PriorityThreadFactory("ScheduledThreadPool", Thread.NORM_PRIORITY));
+        //不知道为什么不存在，这个方法
 //        scheduledThreadPool.setRemoveOnCancelPolicy(true);
-//
-//        disconnectionScheduledThreadPool = new ScheduledThreadPoolExecutorAE(4, new PriorityThreadFactory(
-//                "ScheduledThreadPool", Thread.NORM_PRIORITY));
+        disconnectionScheduledThreadPool = new ScheduledThreadPoolExecutorAE(4, new PriorityThreadFactory("ScheduledThreadPool", Thread.NORM_PRIORITY));
 //        disconnectionScheduledThreadPool.setRemoveOnCancelPolicy(true);
-//
-//        gameServerPacketsThreadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 5L, TimeUnit.SECONDS,
-//                new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory("Game Server Packet Pool",
-//                Thread.NORM_PRIORITY + 3));
-//
-//    }
+        gameServerPacketsThreadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 5L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory("Game Server Packet Pool", Thread.NORM_PRIORITY + 3));
+    }
 
     /**
      * Schedule

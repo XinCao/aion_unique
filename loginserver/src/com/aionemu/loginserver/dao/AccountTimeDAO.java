@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aion-emu.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.aionemu.loginserver.dao;
 
 import com.aionemu.commons.database.dao.DAO;
@@ -24,13 +23,13 @@ import com.aionemu.loginserver.model.AccountTime;
  * DAO to manage account time
  */
 public abstract class AccountTimeDAO implements DAO {
+
     /**
      * Updates @link com.aionemu.loginserver.model.AccountTime data of account
      *
      * @param accountId
      *            account id
-     * @param accountTime
-     *            account time set
+     * @param accountTime account time set
      * @return was update successfull or not
      */
     public abstract boolean updateAccountTime(int accountId, AccountTime accountTime);
@@ -49,9 +48,7 @@ public abstract class AccountTimeDAO implements DAO {
      * @return uniquire class name for all implementations
      */
     @Override
-    public final String getClassName()
-    {
+    public final String getClassName() {
         return AccountTimeDAO.class.getName();
     }
-
 }

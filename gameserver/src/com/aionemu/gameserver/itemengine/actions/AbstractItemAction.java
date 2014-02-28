@@ -26,22 +26,22 @@ import com.aionemu.gameserver.model.gameobjects.player.Player;
 
 /**
  * @author ATracer
- * 
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AbstractItemAction")
-public abstract class AbstractItemAction
-{
-	/**
-	 * This instance should be set in unmarshal method
-	 */
-	protected XmlServiceProxy xsp;
-	/**
-	 * 
-	 * @param player
-	 * @param parentItem
-	 * @param targetItem
-	 */
-	public abstract void act(Player player, Item parentItem, Item targetItem);
+public abstract class AbstractItemAction {
 
+    /**
+     * This instance should be set in unmarshal method
+     */
+    protected XmlServiceProxy xsp;
+
+    /**
+     *
+     * @param player
+     * @param parentItem
+     * @param targetItem
+     */
+    public abstract void act(Player player, Item parentItem, Item targetItem);
 }

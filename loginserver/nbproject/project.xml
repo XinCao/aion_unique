@@ -5,6 +5,8 @@
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
             <name>loginserver</name>
             <source-roots>
+                <root id="src.config.dir"/>
+                <root id="src.sql.dir"/>
                 <root id="src.src.dir"/>
             </source-roots>
             <test-roots/>
