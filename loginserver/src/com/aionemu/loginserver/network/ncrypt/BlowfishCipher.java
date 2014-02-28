@@ -1,47 +1,41 @@
-
 /**
  * This file is part of aion-emu <aion-emu.com>.
  *
- *  aion-emu is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * aion-emu is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- *  aion-emu is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * aion-emu is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with aion-emu.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * aion-emu. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.aionemu.loginserver.network.ncrypt;
 
 /**
- * Blowfish Cipher - symmetric 16-round cipher, uses 64-bit blocks,
- * 32-448 key size and key-dependend 32-bit four S-boxes
+ * Blowfish Cipher - symmetric 16-round cipher, uses 64-bit blocks, 32-448 key
+ * size and key-dependend 32-bit four S-boxes
  *
  * @author EvilSpirit
  */
-public class BlowfishCipher
-{
-    /**
-     * HEX-digits of Pi (Math), arranged in four S boxes and one P array
-     * for Blowfish Cipher
-     */
+public class BlowfishCipher {
 
+    /**
+     * HEX-digits of Pi (Math), arranged in four S boxes and one P array for
+     * Blowfish Cipher
+     */
     // 18 32-bits cipher keys
-    private static final int[] PARRAY_INIT =
-    {
+    private static final int[] PARRAY_INIT = {
         0x243F6A88, 0x85A308D3, 0x13198A2E, 0x03707344, 0xA4093822, 0x299F31D0, 0x082EFA98, 0xEC4E6C89, 0x452821E6,
         0x38D01377, 0xBE5466CF, 0x34E90C6C, 0xC0AC29B7, 0xC97C50DD, 0x3F84D5B5, 0xB5470917, 0x9216D5D9, 0x8979FB1B
     };
-
     /**
      * Constants - Pi value
      */
-    private static final int[] SBOX_INIT_0 =
-    {
+    private static final int[] SBOX_INIT_0 = {
         0xD1310BA6, 0x98DFB5AC, 0x2FFD72DB, 0xD01ADFB7, 0xB8E1AFED, 0x6A267E96, 0xBA7C9045, 0xF12C7F99, 0x24A19947,
         0xB3916CF7, 0x0801F2E2, 0x858EFC16, 0x636920D8, 0x71574E69, 0xA458FEA3, 0xF4933D7E, 0x0D95748F, 0x728EB658,
         0x718BCD58, 0x82154AEE, 0x7B54A41D, 0xC25A59B5, 0x9C30D539, 0x2AF26013, 0xC5D1B023, 0x286085F0, 0xCA417918,
@@ -75,8 +69,7 @@ public class BlowfishCipher
     /**
      * Constants - Pi value
      */
-    private static final int[] SBOX_INIT_1 =
-    {
+    private static final int[] SBOX_INIT_1 = {
         0x4B7A70E9, 0xB5B32944, 0xDB75092E, 0xC4192623, 0xAD6EA6B0, 0x49A7DF7D, 0x9CEE60B8, 0x8FEDB266, 0xECAA8C71,
         0x699A17FF, 0x5664526C, 0xC2B19EE1, 0x193602A5, 0x75094C29, 0xA0591340, 0xE4183A3E, 0x3F54989A, 0x5B429D65,
         0x6B8FE4D6, 0x99F73FD6, 0xA1D29C07, 0xEFE830F5, 0x4D2D38E6, 0xF0255DC1, 0x4CDD2086, 0x8470EB26, 0x6382E9C6,
@@ -110,8 +103,7 @@ public class BlowfishCipher
     /**
      * Constants - Pi value
      */
-    private static final int[] SBOX_INIT_2 =
-    {
+    private static final int[] SBOX_INIT_2 = {
         0xE93D5A68, 0x948140F7, 0xF64C261C, 0x94692934, 0x411520F7, 0x7602D4F7, 0xBCF46B2E, 0xD4A20068, 0xD4082471,
         0x3320F46A, 0x43B7D4B7, 0x500061AF, 0x1E39F62E, 0x97244546, 0x14214F74, 0xBF8B8840, 0x4D95FC1D, 0x96B591AF,
         0x70F4DDD3, 0x66A02F45, 0xBFBC09EC, 0x03BD9785, 0x7FAC6DD0, 0x31CB8504, 0x96EB27B3, 0x55FD3941, 0xDA2547E6,
@@ -145,8 +137,7 @@ public class BlowfishCipher
     /**
      * Constants - Pi value
      */
-    private static final int[] SBOX_INIT_3 =
-    {
+    private static final int[] SBOX_INIT_3 = {
         0x3A39CE37, 0xD3FAF5CF, 0xABC27737, 0x5AC52D1B, 0x5CB0679E, 0x4FA33742, 0xD3822740, 0x99BC9BBE, 0xD5118E9D,
         0xBF0F7315, 0xD62D1C7E, 0xC700C47B, 0xB78C1B6B, 0x21A19045, 0xB26EB1BE, 0x6A366EB4, 0x5748AB2F, 0xBC946E79,
         0xC6A376D2, 0x6549C2C8, 0x530FF8EE, 0x468DDE7D, 0xD5730A1D, 0x4CD04DC6, 0x2939BBDB, 0xA9BA4650, 0xAC9526E8,
@@ -177,15 +168,14 @@ public class BlowfishCipher
         0x4CF9AA7E, 0x1948C25C, 0x02FB8A8C, 0x01C36AE4, 0xD6EBE1F9, 0x90D4F869, 0xA65CDEA0, 0x3F09252D, 0xC208E69F,
         0xB74E6132, 0xCE77E25B, 0x578FDFE3, 0x3AC372E6
     };
-
     /**
      * Blowfish cipher secret key
      */
-    private byte[]  blowfishKey;
+    private byte[] blowfishKey;
     /**
      * pArray
      */
-    private int[]   pArray;
+    private int[] pArray;
     /**
      * sBoxes
      */
@@ -193,21 +183,22 @@ public class BlowfishCipher
 
     /**
      * Default constructor. Initializes the Blowfish Cipher with blowfishKey
+     *
      * @param blowfishKey Blowfish Key
      */
-    public BlowfishCipher(byte[] blowfishKey)
-    {
+    public BlowfishCipher(byte[] blowfishKey) {
         pArray = new int[18];
         sBoxes = new int[4][256];
         updateKey(blowfishKey);
     }
 
     /**
-     * Update current blowfish key with the new one and reinitialize the P-array and S-boxes
+     * Update current blowfish key with the new one and reinitialize the P-array
+     * and S-boxes
+     *
      * @param blowfishKey new blowfish key
      */
-    public void updateKey(byte[] blowfishKey)
-    {
+    public void updateKey(byte[] blowfishKey) {
         this.blowfishKey = blowfishKey;
         System.arraycopy(SBOX_INIT_0, 0, sBoxes[0], 0, 256);
         System.arraycopy(SBOX_INIT_1, 0, sBoxes[1], 0, 256);
@@ -219,20 +210,16 @@ public class BlowfishCipher
     /**
      * Initialise the P-array and S-boxes
      */
-    private void initArrays()
-    {
+    private void initArrays() {
         int keyIndex = 0;
 
-        for (int i = 0; i < 18; i++)
-        {
+        for (int i = 0; i < 18; i++) {
             int data = 0;
 
-            for (int j = 0; j < 4; j++)
-            {
+            for (int j = 0; j < 4; j++) {
                 data = (data << 8) | (blowfishKey[keyIndex++] & 0xFF);
 
-                if (keyIndex >= blowfishKey.length)
-                {
+                if (keyIndex >= blowfishKey.length) {
                     keyIndex = 0;
                 }
             }
@@ -242,15 +229,13 @@ public class BlowfishCipher
 
         byte[] b = new byte[8];
 
-        for (int i = 0; i < 18; i += 2)
-        {
+        for (int i = 0; i < 18; i += 2) {
             cipher(b);
-            pArray[i]     = byteArrayToInteger(b, 0);
+            pArray[i] = byteArrayToInteger(b, 0);
             pArray[i + 1] = byteArrayToInteger(b, 4);
         }
 
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             initSBox(b, sBoxes[i]);
         }
     }
@@ -259,58 +244,54 @@ public class BlowfishCipher
      * @param b
      * @param sBox
      */
-    private void initSBox(byte[] b, int[] sBox)
-    {
-        for (int j = 0; j < 256; j += 2)
-        {
+    private void initSBox(byte[] b, int[] sBox) {
+        for (int j = 0; j < 256; j += 2) {
             cipher(b);
-            sBox[j]     = byteArrayToInteger(b, 0);
+            sBox[j] = byteArrayToInteger(b, 0);
             sBox[j + 1] = byteArrayToInteger(b, 4);
         }
     }
 
     /**
      * Cipher the given byte-array with Blowfish cipher
+     *
      * @param data byte array to be ciphered
      */
-    public void cipher(byte[] data)
-    {
+    public void cipher(byte[] data) {
         cipher(data, 0, data.length);
     }
 
     /**
      * Cipher the given byte-array with Blowfish cipher
+     *
      * @param data byte array to be ciphered
      * @param offset byte array offset
      * @param length byte array length
      */
-    public void cipher(byte[] data, int offset, int length)
-    {
+    public void cipher(byte[] data, int offset, int length) {
         int blockNumber = length >> 3;
         int p;
 
-        for (int k = 0; k < blockNumber; k++)
-        {
+        for (int k = 0; k < blockNumber; k++) {
             p = offset + (k << 3);
 
             int xl = byteArrayToInteger(data, p);
             int xr = byteArrayToInteger(data, p + 4);
             int tmp;
 
-            for (int i = 0; i < 16; i++)
-            {
-                xl  = xl ^ pArray[i];
-                xr  = F(xl) ^ xr;
+            for (int i = 0; i < 16; i++) {
+                xl = xl ^ pArray[i];
+                xr = F(xl) ^ xr;
                 tmp = xl;
-                xl  = xr;
-                xr  = tmp;
+                xl = xr;
+                xr = tmp;
             }
 
             tmp = xl;
-            xl  = xr;
-            xr  = tmp;
-            xr  ^= pArray[16];
-            xl  ^= pArray[17];
+            xl = xr;
+            xr = tmp;
+            xr ^= pArray[16];
+            xl ^= pArray[17];
             integerToByteArray(xl, data, p);
             integerToByteArray(xr, data, p + 4);
         }
@@ -318,46 +299,44 @@ public class BlowfishCipher
 
     /**
      * Decipher the given byte-array with Blowfish cipher
+     *
      * @param data byte array to be deciphered
      */
-    public void decipher(byte[] data)
-    {
+    public void decipher(byte[] data) {
         decipher(data, 0, data.length);
     }
 
     /**
      * Decipher the given byte-array with Blowfish cipher
+     *
      * @param data byte array to be deciphered
      * @param offset byte array offset
      * @param length byte array length
      */
-    public void decipher(byte[] data, int offset, int length)
-    {
+    public void decipher(byte[] data, int offset, int length) {
         int blocks = length >> 3;
         int p;
 
-        for (int k = 0; k < blocks; k++)
-        {
+        for (int k = 0; k < blocks; k++) {
             p = offset + (k << 3);
 
             int lb = byteArrayToInteger(data, p);
             int rb = byteArrayToInteger(data, p + 4);
             int tmp;
 
-            for (int i = 17; i > 1; i--)
-            {
-                lb  = lb ^ pArray[i];
-                rb  = F(lb) ^ rb;
+            for (int i = 17; i > 1; i--) {
+                lb = lb ^ pArray[i];
+                rb = F(lb) ^ rb;
                 tmp = lb;
-                lb  = rb;
-                rb  = tmp;
+                lb = rb;
+                rb = tmp;
             }
 
             tmp = lb;
-            lb  = rb;
-            rb  = tmp;
-            rb  ^= pArray[1];
-            lb  ^= pArray[0];
+            lb = rb;
+            rb = tmp;
+            rb ^= pArray[1];
+            lb ^= pArray[0];
             integerToByteArray(lb, data, p);
             integerToByteArray(rb, data, p + 4);
         }
@@ -365,11 +344,11 @@ public class BlowfishCipher
 
     /**
      * The round (Feistel) function of Blowfish cipher
+     *
      * @param x
      * @return y
      */
-    private int F(int x)
-    {
+    private int F(int x) {
         int a, b, c, d;
 
         d = x & 0xFF;
@@ -390,25 +369,25 @@ public class BlowfishCipher
 
     /**
      * Convert 4 bytes to Integer
+     *
      * @param b byte array (4 bytes)
      * @param offset byte array offset
      * @return integer value
      */
-    private int byteArrayToInteger(byte[] b, int offset)
-    {
+    private int byteArrayToInteger(byte[] b, int offset) {
         return (b[offset + 3] & 0xFF) << 24 | (b[offset + 2] & 0xFF) << 16 | (b[offset + 1] & 0xFF) << 8
-               | (b[offset] & 0xFF);
+                | (b[offset] & 0xFF);
     }
 
     /**
      * Convert integer value to bytes
+     *
      * @param value integer value
      * @param b dest byte array
      * @param offset byte array offset
      */
-    private void integerToByteArray(int value, byte[] b, int offset)
-    {
-        b[offset]     = (byte) (value & 0xFF);
+    private void integerToByteArray(int value, byte[] b, int offset) {
+        b[offset] = (byte) (value & 0xFF);
         b[offset + 1] = (byte) (value >> 8 & 0xFF);
         b[offset + 2] = (byte) (value >> 16 & 0xFF);
         b[offset + 3] = (byte) (value >> 24 & 0xFF);

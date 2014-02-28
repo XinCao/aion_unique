@@ -149,7 +149,6 @@ public abstract class AConnection {
             if (isWriteDisabled()) {
                 return;
             }
-
             isForcedClosing = forced;
             getDispatcher().closeConnection(this);
         }

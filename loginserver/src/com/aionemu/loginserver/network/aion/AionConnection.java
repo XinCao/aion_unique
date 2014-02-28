@@ -162,13 +162,10 @@ public class AionConnection extends AConnection {
     protected final boolean writeData(ByteBuffer data) {
         synchronized (guard) {
             AionServerPacket packet = sendMsgQueue.pollFirst();
-
             if (packet == null) {
                 return false;
             }
-
             packet.write(this, data);
-
             return true;
         }
     }
@@ -185,9 +182,6 @@ public class AionConnection extends AConnection {
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected final void onDisconnect() {
         /**
