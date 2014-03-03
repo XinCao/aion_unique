@@ -77,7 +77,6 @@ public class GsConnection extends AConnection {
     public GsConnection(SocketChannel sc, Dispatcher d) throws IOException {
         super(sc, d);
         state = State.CONNECTED;
-
         String ip = getIP();
         log.info("GS connection from: " + ip);
     }
@@ -94,11 +93,9 @@ public class GsConnection extends AConnection {
     public boolean processData(ByteBuffer data) {
         GsClientPacket pck = GsPacketHandler.handle(data, this);
         log.info("recived packet: " + pck);
-
         if (pck != null && pck.read()) {
             ThreadPoolManager.getInstance().executeGsPacket(pck);
         }
-
         return true;
     }
 
@@ -117,7 +114,6 @@ public class GsConnection extends AConnection {
             if (packet == null) {
                 return false;
             }
-
             packet.write(this, data);
             return true;
         }
@@ -194,9 +190,7 @@ public class GsConnection extends AConnection {
             if (isWriteDisabled()) {
                 return;
             }
-
             log.info("sending packet: " + closePacket + " and closing connection after that.");
-
             pendingClose = true;
             isForcedClosing = forced;
             sendMsgQueue.clear();

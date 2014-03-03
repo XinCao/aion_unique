@@ -26,7 +26,9 @@ import org.apache.log4j.Logger;
 import com.aionemu.commons.utils.ExitCode;
 
 /**
- * @author -Nemesiss-
+ * 死锁检查
+ * 
+ * @author caoxin
  */
 public class DeadLockDetector extends Thread {
 
@@ -98,16 +100,12 @@ public class DeadLockDetector extends Thread {
                         }
                         ThreadInfo dl = ti;
                         info += "Java-level deadlock:\n";
-                        info += "\t" + dl.getThreadName() + " is waiting to lock " + dl.getLockInfo().toString()
-                                + " which is held by " + dl.getLockOwnerName() + "\n";
-                        while ((dl = tmx.getThreadInfo(new long[]{dl.getLockOwnerId()}, true, true)[0])
-                                .getThreadId() != ti.getThreadId()) {
-                            info += "\t" + dl.getThreadName() + " is waiting to lock " + dl.getLockInfo().toString()
-                                    + " which is held by " + dl.getLockOwnerName() + "\n";
+                        info += "\t" + dl.getThreadName() + " is waiting to lock " + dl.getLockInfo().toString() + " which is held by " + dl.getLockOwnerName() + "\n";
+                        while ((dl = tmx.getThreadInfo(new long[]{dl.getLockOwnerId()}, true, true)[0]).getThreadId() != ti.getThreadId()) {
+                            info += "\t" + dl.getThreadName() + " is waiting to lock " + dl.getLockInfo().toString() + " which is held by " + dl.getLockOwnerName() + "\n";
                         }
                     }
                     log.warn(info);
-
                     if (doWhenDL == RESTART) {
                         System.exit(ExitCode.CODE_RESTART);
                     }

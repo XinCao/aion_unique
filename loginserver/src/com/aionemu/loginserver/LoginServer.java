@@ -45,15 +45,15 @@ public class LoginServer {
      */
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
-        LoggingService.init();
+        LoggingService.init(); // 日志初始化
         Config.load();
-        Util.printSection("DataBase");
+        Util.printSection("DataBase"); // 数据库初始化
         DatabaseFactory.init();
         DAOManager.init();
         /**
          * Start deadlock detector that will restart server if deadlock happened
          */
-        new DeadLockDetector(60, DeadLockDetector.RESTART).start();
+        new DeadLockDetector(60, DeadLockDetector.RESTART).start(); // 检查死锁
         ThreadPoolManager.getInstance();
         /**
          * Initialize Key Generator
@@ -69,8 +69,6 @@ public class LoginServer {
         GameServerTable.load();
         Util.printSection("BannedIP");
         BannedIpController.load();
-        // TODO! flood protector
-        // TODO! brute force protector
         Util.printSection("IOServer");
         IOServer.getInstance().connect();
         Runtime.getRuntime().addShutdownHook(Shutdown.getInstance());

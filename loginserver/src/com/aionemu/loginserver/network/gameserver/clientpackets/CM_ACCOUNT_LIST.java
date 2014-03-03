@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aion-emu.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.aionemu.loginserver.network.gameserver.clientpackets;
 
 import java.nio.ByteBuffer;
@@ -31,52 +30,46 @@ import com.aionemu.loginserver.GameServerTable;
  *
  * @author SoulKeeper
  */
-public class CM_ACCOUNT_LIST extends GsClientPacket
-{
-	/**
-	 * Array with accounts that are logged in
-	 */
-	private String[] accountNames;
+public class CM_ACCOUNT_LIST extends GsClientPacket {
 
-	/**
-	 * Creates new packet instance.
-	 *
-	 * @param buf	packet data
-	 * @param client client
-	 */
-	public CM_ACCOUNT_LIST(ByteBuffer buf, GsConnection client)
-	{
-		super(buf, client, 0x04);
-	}
+    /**
+     * Array with accounts that are logged in
+     */
+    private String[] accountNames;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void readImpl()
-	{
-		accountNames = new String[readD()];
-		for(int i = 0; i < accountNames.length; i++)
-		{
-			accountNames[i] = readS();
-		}
-	}
+    /**
+     * Creates new packet instance.
+     *
+     * @param buf	packet data
+     * @param client client
+     */
+    public CM_ACCOUNT_LIST(ByteBuffer buf, GsConnection client) {
+        super(buf, client, 0x04);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void runImpl()
-	{
-		for(String s : accountNames)
-		{
-			Account a = AccountController.loadAccount(s);
-			if(GameServerTable.isAccountOnAnyGameServer(a))
-			{
-				getConnection().sendPacket(new SM_REQUEST_KICK_ACCOUNT(a.getId()));
-				continue;
-			}
-			getConnection().getGameServerInfo().addAccountToGameServer(a);
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void readImpl() {
+        accountNames = new String[readD()];
+        for (int i = 0; i < accountNames.length; i++) {
+            accountNames[i] = readS();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void runImpl() {
+        for (String s : accountNames) {
+            Account a = AccountController.loadAccount(s);
+            if (GameServerTable.isAccountOnAnyGameServer(a)) {
+                getConnection().sendPacket(new SM_REQUEST_KICK_ACCOUNT(a.getId()));
+                continue;
+            }
+            getConnection().getGameServerInfo().addAccountToGameServer(a);
+        }
+    }
 }

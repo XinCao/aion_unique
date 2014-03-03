@@ -112,8 +112,7 @@ public class ThreadPoolManager implements DisconnectionThreadPool {
             if (initial < 0) {
                 initial = 0;
             }
-            return (ScheduledFuture<T>) scheduledThreadPool.scheduleAtFixedRate(r, initial, delay,
-                    TimeUnit.MILLISECONDS);
+            return (ScheduledFuture<T>) scheduledThreadPool.scheduleAtFixedRate(r, initial, delay, TimeUnit.MILLISECONDS);
         } catch (RejectedExecutionException e) {
             return null;
         }

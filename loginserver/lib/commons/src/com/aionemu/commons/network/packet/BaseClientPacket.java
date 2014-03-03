@@ -207,7 +207,7 @@ public abstract class BaseClientPacket<T extends AConnection> extends BasePacket
      * @return String
      */
     protected final String readS() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         char ch;
         try {
             while ((ch = buf.getChar()) != 0) {

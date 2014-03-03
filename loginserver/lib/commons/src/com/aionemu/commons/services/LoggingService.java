@@ -100,15 +100,12 @@ public class LoggingService {
         } catch (Exception e) {
             throw new Log4jInitializationError("Can't initialize logging", e);
         }
-
         overrideDefaultLoggerFactory();
-
         // Initialize JULI to Log4J bridge
         Logger logger = LogManager.getLogManager().getLogger("");
         for (Handler h : logger.getHandlers()) {
             logger.removeHandler(h);
         }
-
         logger.addHandler(new JuliToLog4JHandler());
     }
 
@@ -129,8 +126,7 @@ public class LoggingService {
         try {
             Field field = lr.getClass().getDeclaredField("defaultFactory");
             field.setAccessible(true);
-            String cn = System.getProperty(LOGGER_FACTORY_CLASS_PROPERTY, ThrowableAsMessageAwareFactory.class
-                    .getName());
+            String cn = System.getProperty(LOGGER_FACTORY_CLASS_PROPERTY, ThrowableAsMessageAwareFactory.class.getName());
             Class<?> c = Class.forName(cn);
             field.set(lr, c.newInstance());
             field.setAccessible(false);
