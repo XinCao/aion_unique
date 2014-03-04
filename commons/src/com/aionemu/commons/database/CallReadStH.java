@@ -23,12 +23,12 @@ import java.sql.SQLException;
  * @author ATracer
  *
  */
-public interface CallReadStH extends ReadStH
-{
-	/**
-	 * 
-	 * @param stmt
-	 * @throws SQLException
-	 */
-	public void setParams(CallableStatement stmt) throws SQLException;
+public interface CallReadStH extends ReadStH {
+
+    /**
+     *
+     * @param stmt
+     * @throws SQLException
+     */
+    public void setParams(CallableStatement stmt) throws SQLException;
 }

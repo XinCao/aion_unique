@@ -20,33 +20,29 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author lord_rex and MrPoke
- * 
+ *
  */
-public abstract class AbstractLockManager
-{
-	private final ReentrantReadWriteLock			lock		= new ReentrantReadWriteLock();
-	
-	private final ReentrantReadWriteLock.WriteLock	writeLock	= lock.writeLock();
-	// private final ReentrantReadWriteLock.ReadLock	readLock	= lock.readLock(); // Later could be used.
+public abstract class AbstractLockManager {
 
-	public final void writeLock()
-	{
-		writeLock.lock();
-	}
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
+    // private final ReentrantReadWriteLock.ReadLock	readLock	= lock.readLock(); // Later could be used.
 
-	public final void writeUnlock()
-	{
-		writeLock.unlock();
-	}
+    public final void writeLock() {
+        writeLock.lock();
+    }
+
+    public final void writeUnlock() {
+        writeLock.unlock();
+    }
+    /* Later could be used.
+     public final void readLock()
+     {
+     readLock.lock();
+     }
 	
-	/* Later could be used.
-	public final void readLock()
-	{
-		readLock.lock();
-	}
-	
-	public final void readUnlock()
-	{
-		readLock.unlock();
-	}*/
+     public final void readUnlock()
+     {
+     readLock.unlock();
+     }*/
 }

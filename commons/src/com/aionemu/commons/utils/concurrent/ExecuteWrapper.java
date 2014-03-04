@@ -25,67 +25,55 @@ import javolution.text.TextBuilder;
 /**
  * @author NB4L1
  */
-public class ExecuteWrapper implements Runnable
-{
-	private static final Logger	log	= Logger.getLogger(ExecuteWrapper.class);
+public class ExecuteWrapper implements Runnable {
 
-	private final Runnable		runnable;
+    private static final Logger log = Logger.getLogger(ExecuteWrapper.class);
+    private final Runnable runnable;
 
-	public ExecuteWrapper(Runnable runnable)
-	{
-		this.runnable = runnable;
-	}
+    public ExecuteWrapper(Runnable runnable) {
+        this.runnable = runnable;
+    }
 
-	@Override
-	public final void run()
-	{
-		ExecuteWrapper.execute(runnable, getMaximumRuntimeInMillisecWithoutWarning());
-	}
+    @Override
+    public final void run() {
+        ExecuteWrapper.execute(runnable, getMaximumRuntimeInMillisecWithoutWarning());
+    }
 
-	protected long getMaximumRuntimeInMillisecWithoutWarning()
-	{
-		return Long.MAX_VALUE;
-	}
+    protected long getMaximumRuntimeInMillisecWithoutWarning() {
+        return Long.MAX_VALUE;
+    }
 
-	public static void execute(Runnable runnable)
-	{
-		execute(runnable, Long.MAX_VALUE);
-	}
+    public static void execute(Runnable runnable) {
+        execute(runnable, Long.MAX_VALUE);
+    }
 
-	public static void execute(Runnable runnable, long maximumRuntimeInMillisecWithoutWarning)
-	{
-		long begin = System.nanoTime();
+    public static void execute(Runnable runnable, long maximumRuntimeInMillisecWithoutWarning) {
+        long begin = System.nanoTime();
 
-		try
-		{
-			runnable.run();
-		}
-		catch(RuntimeException e)
-		{
-			log.warn("Exception in a Runnable execution:", e);
-		}
-		finally
-		{
-			long runtimeInNanosec = System.nanoTime() - begin;
-			Class<? extends Runnable> clazz = runnable.getClass();
+        try {
+            runnable.run();
+        } catch (RuntimeException e) {
+            log.warn("Exception in a Runnable execution:", e);
+        } finally {
+            long runtimeInNanosec = System.nanoTime() - begin;
+            Class<? extends Runnable> clazz = runnable.getClass();
 
-			RunnableStatsManager.handleStats(clazz, runtimeInNanosec);
+            RunnableStatsManager.handleStats(clazz, runtimeInNanosec);
 
-			long runtimeInMillisec = TimeUnit.NANOSECONDS.toMillis(runtimeInNanosec);
+            long runtimeInMillisec = TimeUnit.NANOSECONDS.toMillis(runtimeInNanosec);
 
-			if(runtimeInMillisec > maximumRuntimeInMillisecWithoutWarning)
-			{
-				TextBuilder tb = TextBuilder.newInstance();
+            if (runtimeInMillisec > maximumRuntimeInMillisecWithoutWarning) {
+                TextBuilder tb = TextBuilder.newInstance();
 
-				tb.append(clazz);
-				tb.append(" - execution time: ");
-				tb.append(runtimeInMillisec);
-				tb.append("msec");
+                tb.append(clazz);
+                tb.append(" - execution time: ");
+                tb.append(runtimeInMillisec);
+                tb.append("msec");
 
-				log.warn(tb);
+                log.warn(tb);
 
-				TextBuilder.recycle(tb);
-			}
-		}
-	}
+                TextBuilder.recycle(tb);
+            }
+        }
+    }
 }

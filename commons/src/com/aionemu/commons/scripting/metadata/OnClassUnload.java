@@ -23,17 +23,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Method marked as {@link OnClassUnload} will be called when there is a script reload or shutdown.<br>
+ * Method marked as {@link OnClassUnload} will be called when there is a script
+ * reload or shutdown.<br>
  * Only static methods with no arguments can be marked with this annotation.<br>
- * 
- * This is only used if {@link com.aionemu.commons.scripting.ScriptContext#getClassListener()} returns instance of
- * {@link com.aionemu.commons.scripting.classlistener.DefaultClassListener} subclass.
- * 
+ *
+ * This is only used if
+ * {@link com.aionemu.commons.scripting.ScriptContext#getClassListener()}
+ * returns instance of
+ * {@link com.aionemu.commons.scripting.classlistener.DefaultClassListener}
+ * subclass.
+ *
  * @author SoulKeeper
  */
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OnClassUnload
-{
+public @interface OnClassUnload {
 }

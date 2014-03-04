@@ -36,231 +36,191 @@ import com.aionemu.commons.scripting.ScriptCompiler;
 
 /**
  * Wrapper for JavaCompiler api
- * 
+ *
  * @author SoulKeeper
  */
-public class ScriptCompilerImpl implements ScriptCompiler
-{
-	/**
-	 * Logger for this class
-	 */
-	private static final Logger		log	= Logger.getLogger(ScriptCompilerImpl.class);
+public class ScriptCompilerImpl implements ScriptCompiler {
 
-	/**
-	 * Instance of JavaCompiler that will be used to compile classes
-	 */
-	protected final JavaCompiler	javaCompiler;
+    /**
+     * Logger for this class
+     */
+    private static final Logger log = Logger.getLogger(ScriptCompilerImpl.class);
+    /**
+     * Instance of JavaCompiler that will be used to compile classes
+     */
+    protected final JavaCompiler javaCompiler;
+    /**
+     * List of jar files
+     */
+    protected Iterable<File> libraries;
+    /**
+     * Parent classloader that has to be used for this compiler
+     */
+    protected ScriptClassLoader parentClassLoader;
 
-	/**
-	 * List of jar files
-	 */
-	protected Iterable<File>		libraries;
+    /**
+     * Creates new instance of JavaCompilerImpl. If system compiler is not
+     * available - throws RuntimeExcetion
+     *
+     * @throws RuntimeException if compiler is not available
+     */
+    public ScriptCompilerImpl() {
+        this.javaCompiler = ToolProvider.getSystemJavaCompiler();
 
-	/**
-	 * Parent classloader that has to be used for this compiler
-	 */
-	protected ScriptClassLoader		parentClassLoader;
+        if (javaCompiler == null) {
+            if (ToolProvider.getSystemJavaCompiler() != null) {
+                throw new RuntimeException(new InstantiationException("JavaCompiler is not aviable."));
+            }
+        }
+    }
 
-	/**
-	 * Creates new instance of JavaCompilerImpl. If system compiler is not available - throws RuntimeExcetion
-	 * 
-	 * @throws RuntimeException
-	 *             if compiler is not available
-	 */
-	public ScriptCompilerImpl()
-	{
-		this.javaCompiler = ToolProvider.getSystemJavaCompiler();
+    /**
+     * Sets parent classLoader for this JavaCompilerImpl
+     *
+     * @param classLoader parent classloader
+     */
+    @Override
+    public void setParentClassLoader(ScriptClassLoader classLoader) {
+        this.parentClassLoader = classLoader;
+    }
 
-		if(javaCompiler == null)
-		{
-			if(ToolProvider.getSystemJavaCompiler() != null)
-			{
-				throw new RuntimeException(new InstantiationException("JavaCompiler is not aviable."));
-			}
-		}
-	}
+    /**
+     * Sets jar files that should be used for this compiler as libraries
+     *
+     * @param files list of jar files
+     */
+    @Override
+    public void setLibraires(Iterable<File> files) {
+        libraries = files;
+    }
 
-	/**
-	 * Sets parent classLoader for this JavaCompilerImpl
-	 * 
-	 * @param classLoader
-	 *            parent classloader
-	 */
-	@Override
-	public void setParentClassLoader(ScriptClassLoader classLoader)
-	{
-		this.parentClassLoader = classLoader;
-	}
+    /**
+     * Compiles given class.
+     *
+     * @param className Name of the class
+     * @param sourceCode source code
+     * @return CompilationResult with the class
+     * @throws RuntimeException if compilation failed with errros
+     */
+    @Override
+    public CompilationResult compile(String className, String sourceCode) {
+        return compile(new String[]{className}, new String[]{sourceCode});
+    }
 
-	/**
-	 * Sets jar files that should be used for this compiler as libraries
-	 * 
-	 * @param files
-	 *            list of jar files
-	 */
-	@Override
-	public void setLibraires(Iterable<File> files)
-	{
-		libraries = files;
-	}
+    /**
+     * Compiles list of classes. Amount of classNames must be equal to amount of
+     * sourceCodes
+     *
+     * @param classNames classNames
+     * @param sourceCode list of source codes
+     * @return CompilationResult with needed files
+     * @throws IllegalArgumentException if size of classNames not equals to size
+     * of sourceCodes
+     * @throws RuntimeException if compilation failed with errros
+     */
+    @Override
+    public CompilationResult compile(String[] classNames, String[] sourceCode) throws IllegalArgumentException {
 
-	/**
-	 * Compiles given class.
-	 * 
-	 * @param className
-	 *            Name of the class
-	 * @param sourceCode
-	 *            source code
-	 * @return CompilationResult with the class
-	 * @throws RuntimeException
-	 *             if compilation failed with errros
-	 */
-	@Override
-	public CompilationResult compile(String className, String sourceCode)
-	{
-		return compile(new String[] { className }, new String[] { sourceCode });
-	}
+        if (classNames.length != sourceCode.length) {
+            throw new IllegalArgumentException("Amount of classes is not equal to amount of sources");
+        }
 
-	/**
-	 * Compiles list of classes. Amount of classNames must be equal to amount of sourceCodes
-	 * 
-	 * @param classNames
-	 *            classNames
-	 * @param sourceCode
-	 *            list of source codes
-	 * @return CompilationResult with needed files
-	 * @throws IllegalArgumentException
-	 *             if size of classNames not equals to size of sourceCodes
-	 * @throws RuntimeException
-	 *             if compilation failed with errros
-	 */
-	@Override
-	public CompilationResult compile(String[] classNames, String[] sourceCode) throws IllegalArgumentException
-	{
+        List<JavaFileObject> compilationUnits = new ArrayList<JavaFileObject>();
 
-		if(classNames.length != sourceCode.length)
-		{
-			throw new IllegalArgumentException("Amount of classes is not equal to amount of sources");
-		}
+        for (int i = 0; i < classNames.length; i++) {
+            JavaFileObject compilationUnit = new JavaSourceFromString(classNames[i], sourceCode[i]);
+            compilationUnits.add(compilationUnit);
+        }
 
-		List<JavaFileObject> compilationUnits = new ArrayList<JavaFileObject>();
+        return doCompilation(compilationUnits);
+    }
 
-		for(int i = 0; i < classNames.length; i++)
-		{
-			JavaFileObject compilationUnit = new JavaSourceFromString(classNames[i], sourceCode[i]);
-			compilationUnits.add(compilationUnit);
-		}
+    /**
+     * Compiles given files. Files must be java sources.
+     *
+     * @param compilationUnits files to compile
+     * @return CompilationResult with classes
+     * @throws RuntimeException if compilation failed with errros
+     */
+    @Override
+    public CompilationResult compile(Iterable<File> compilationUnits) {
+        List<JavaFileObject> list = new ArrayList<JavaFileObject>();
 
-		return doCompilation(compilationUnits);
-	}
+        for (File f : compilationUnits) {
+            list.add(new JavaSourceFromFile(f, JavaFileObject.Kind.SOURCE));
+        }
 
-	/**
-	 * Compiles given files. Files must be java sources.
-	 * 
-	 * @param compilationUnits
-	 *            files to compile
-	 * @return CompilationResult with classes
-	 * @throws RuntimeException
-	 *             if compilation failed with errros
-	 */
-	@Override
-	public CompilationResult compile(Iterable<File> compilationUnits)
-	{
-		List<JavaFileObject> list = new ArrayList<JavaFileObject>();
+        return doCompilation(list);
+    }
 
-		for(File f : compilationUnits)
-		{
-			list.add(new JavaSourceFromFile(f, JavaFileObject.Kind.SOURCE));
-		}
+    /**
+     * Actually performs compilation. Compiler expects sources in UTF-8
+     * encoding. Also compiler generates full debugging info for classes.
+     *
+     * @param compilationUnits Units that will be compiled
+     * @return CompilationResult with compiledClasses
+     * @throws RuntimeException if compilation failed with errros
+     */
+    @SuppressWarnings("unchecked")
+    protected CompilationResult doCompilation(Iterable<JavaFileObject> compilationUnits) {
+        List<String> options = Arrays.asList("-encoding", "UTF-8", "-g");
+        DiagnosticListener<JavaFileObject> listener = new ErrorListener();
+        ClassFileManager manager = new ClassFileManager(javaCompiler, listener);
+        manager.setParentClassLoader(parentClassLoader);
 
-		return doCompilation(list);
-	}
+        if (libraries != null) {
+            try {
+                manager.addLibraries(libraries);
+            } catch (IOException e) {
+                log.error("Can't set libraries for compiler.", e);
+            }
+        }
 
-	/**
-	 * Actually performs compilation. Compiler expects sources in UTF-8 encoding. Also compiler generates full debugging
-	 * info for classes.
-	 * 
-	 * @param compilationUnits
-	 *            Units that will be compiled
-	 * @return CompilationResult with compiledClasses
-	 * @throws RuntimeException
-	 *             if compilation failed with errros
-	 */
-	@SuppressWarnings("unchecked")
-	protected CompilationResult doCompilation(Iterable<JavaFileObject> compilationUnits)
-	{
-		List<String> options = Arrays.asList("-encoding", "UTF-8", "-g");
-		DiagnosticListener<JavaFileObject> listener = new ErrorListener();
-		ClassFileManager manager = new ClassFileManager(javaCompiler, listener);
-		manager.setParentClassLoader(parentClassLoader);
+        JavaCompiler.CompilationTask task = javaCompiler.getTask(null, manager, listener, options, null,
+                compilationUnits);
 
-		if(libraries != null)
-		{
-			try
-			{
-				manager.addLibraries(libraries);
-			}
-			catch(IOException e)
-			{
-				log.error("Can't set libraries for compiler.", e);
-			}
-		}
+        if (!task.call()) {
+            throw new RuntimeException("Error while compiling classes");
+        }
 
-		JavaCompiler.CompilationTask task = javaCompiler.getTask(null, manager, listener, options, null,
-			compilationUnits);
+        ScriptClassLoader cl = manager.getClassLoader(null);
+        Class[] compiledClasses = classNamesToClasses(manager.getCompiledClasses().keySet(), cl);
+        return new CompilationResult(compiledClasses, cl);
+    }
 
-		if(!task.call())
-		{
-			throw new RuntimeException("Error while compiling classes");
-		}
+    /**
+     * Reolves list of classes by their names
+     *
+     * @param classNames names of the classes
+     * @param cl classLoader to use to resove classes
+     * @return resolved classes
+     * @throws RuntimeException if can't find class
+     */
+    @SuppressWarnings("unchecked")
+    protected Class[] classNamesToClasses(Collection<String> classNames, ScriptClassLoader cl) {
+        Class<?>[] classes = new Class<?>[classNames.size()];
 
-		ScriptClassLoader cl = manager.getClassLoader(null);
-		Class[] compiledClasses = classNamesToClasses(manager.getCompiledClasses().keySet(), cl);
-		return new CompilationResult(compiledClasses, cl);
-	}
+        int i = 0;
+        for (String className : classNames) {
+            try {
+                Class<?> clazz = cl.loadClass(className);
+                classes[i] = clazz;
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            i++;
+        }
 
-	/**
-	 * Reolves list of classes by their names
-	 * 
-	 * @param classNames
-	 *            names of the classes
-	 * @param cl
-	 *            classLoader to use to resove classes
-	 * @return resolved classes
-	 * @throws RuntimeException
-	 *             if can't find class
-	 */
-	@SuppressWarnings("unchecked")
-	protected Class[] classNamesToClasses(Collection<String> classNames, ScriptClassLoader cl)
-	{
-		Class<?>[] classes = new Class<?>[classNames.size()];
+        return classes;
+    }
 
-		int i = 0;
-		for(String className : classNames)
-		{
-			try
-			{
-				Class<?> clazz = cl.loadClass(className);
-				classes[i] = clazz;
-			}
-			catch(ClassNotFoundException e)
-			{
-				throw new RuntimeException(e);
-			}
-			i++;
-		}
-
-		return classes;
-	}
-
-	/**
-	 * Only java files are supported by java compiler
-	 * 
-	 * @return "java";
-	 */
-	@Override
-	public String[] getSupportedFileTypes()
-	{
-		return new String[] { "java" };
-	}
+    /**
+     * Only java files are supported by java compiler
+     *
+     * @return "java";
+     */
+    @Override
+    public String[] getSupportedFileTypes() {
+        return new String[]{"java"};
+    }
 }

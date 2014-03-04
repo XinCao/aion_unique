@@ -17,45 +17,42 @@
 package com.aionemu.commons.database.dao;
 
 /**
- * This class represents exception that is thrown if DAO implementation was not foud
- * 
+ * This class represents exception that is thrown if DAO implementation was not
+ * foud
+ *
  * @author SoulKeeper
  */
-public class DAONotFoundException extends DAOException
-{
-	/**
-	 * SerialID
-	 */
-	private static final long	serialVersionUID	= 4241980426435305296L;
+public class DAONotFoundException extends DAOException {
 
-	public DAONotFoundException()
-	{
-	}
+    /**
+     * SerialID
+     */
+    private static final long serialVersionUID = 4241980426435305296L;
 
-	/**
-	 * @param message
-	 * 
-	 */
-	public DAONotFoundException(String message)
-	{
-		super(message);
-	}
+    public DAONotFoundException() {
+    }
 
-	/**
-	 * @param message
-	 * @param cause
-	 * 
-	 */
-	public DAONotFoundException(String message, Throwable cause)
-	{
-		super(message, cause);
-	}
+    /**
+     * @param message
+     *
+     */
+    public DAONotFoundException(String message) {
+        super(message);
+    }
 
-	/**
-	 * @param cause
-	 */
-	public DAONotFoundException(Throwable cause)
-	{
-		super(cause);
-	}
+    /**
+     * @param message
+     * @param cause
+     *
+     */
+    public DAONotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * @param cause
+     */
+    public DAONotFoundException(Throwable cause) {
+        super(cause);
+    }
 }

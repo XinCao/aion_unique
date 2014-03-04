@@ -22,56 +22,56 @@ import com.aionemu.commons.scripting.ScriptContext;
 
 /**
  * Context reload listener
- * 
- * @see com.aionemu.commons.scripting.scriptmanager.ScriptManager#reloadContext(com.aionemu.commons.scripting.ScriptContext)
- * 
+ *
+ * @see
+ * com.aionemu.commons.scripting.scriptmanager.ScriptManager#reloadContext(com.aionemu.commons.scripting.ScriptContext)
+ *
  * @author SoulKeeper, Aquanox
  */
 @SuppressWarnings("unchecked")
-public abstract class ContextReloadListener implements Callback
-{
-	/** {@inheritDoc} */
-	@Override
-	public final CallbackResult beforeCall(Object obj, Object[] args)
-	{
-		beforeReload((ScriptContext) args[0]);
-		return CallbackResult.newContinue();
-	}
+public abstract class ContextReloadListener implements Callback {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final CallbackResult afterCall(Object obj, Object[] args, Object methodResult)
-	{
-		afterReload((ScriptContext) args[0]);
-		return CallbackResult.newContinue();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult beforeCall(Object obj, Object[] args) {
+        beforeReload((ScriptContext) args[0]);
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * Invoke before context reload procedure.
-	 * 
-	 * @param ctx
-	 */
-	protected void beforeReload(ScriptContext ctx)
-	{
-		// empty
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult afterCall(Object obj, Object[] args, Object methodResult) {
+        afterReload((ScriptContext) args[0]);
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * Invoke after context reload procedure.
-	 * 
-	 * @param ctx
-	 */
-	protected void afterReload(ScriptContext ctx)
-	{
-		// empty
-	}
+    /**
+     * Invoke before context reload procedure.
+     *
+     * @param ctx
+     */
+    protected void beforeReload(ScriptContext ctx) {
+        // empty
+    }
 
-	/** {@inheritDoc} */
-	@Override
-	public final Class getBaseClass()
-	{
-		return ContextReloadListener.class;
-	}
+    /**
+     * Invoke after context reload procedure.
+     *
+     * @param ctx
+     */
+    protected void afterReload(ScriptContext ctx) {
+        // empty
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class getBaseClass() {
+        return ContextReloadListener.class;
+    }
 }

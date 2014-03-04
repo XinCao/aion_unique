@@ -26,106 +26,87 @@ import javolution.util.FastCollection.Record;
  * @author NB4L1
  */
 @SuppressWarnings("unchecked")
-public class AEFastSet<E> extends AEFastCollection<E> implements Set<E>
-{
-	private static final Object			NULL	= new Object();
+public class AEFastSet<E> extends AEFastCollection<E> implements Set<E> {
 
-	private final FastMap<E, Object>	map;
+    private static final Object NULL = new Object();
+    private final FastMap<E, Object> map;
 
-	public AEFastSet()
-	{
-		map = new FastMap<E, Object>();
-	}
+    public AEFastSet() {
+        map = new FastMap<E, Object>();
+    }
 
-	public AEFastSet(int capacity)
-	{
-		map = new FastMap<E, Object>(capacity);
-	}
+    public AEFastSet(int capacity) {
+        map = new FastMap<E, Object>(capacity);
+    }
 
-	public AEFastSet(Set<? extends E> elements)
-	{
-		map = new FastMap<E, Object>(elements.size());
+    public AEFastSet(Set<? extends E> elements) {
+        map = new FastMap<E, Object>(elements.size());
 
-		addAll(elements);
-	}
+        addAll(elements);
+    }
 
-	/*
-	 * public AEFastSet<E> setShared(boolean isShared) { map.setShared(isShared); return this; }
-	 */
+    /*
+     * public AEFastSet<E> setShared(boolean isShared) { map.setShared(isShared); return this; }
+     */
+    public boolean isShared() {
+        return map.isShared();
+    }
 
-	public boolean isShared()
-	{
-		return map.isShared();
-	}
+    @Override
+    public Record head() {
+        return map.head();
+    }
 
-	@Override
-	public Record head()
-	{
-		return map.head();
-	}
+    @Override
+    public Record tail() {
+        return map.tail();
+    }
 
-	@Override
-	public Record tail()
-	{
-		return map.tail();
-	}
+    @Override
+    public E valueOf(Record record) {
+        return ((FastMap.Entry<E, Object>) record).getKey();
+    }
 
-	@Override
-	public E valueOf(Record record)
-	{
-		return ((FastMap.Entry<E, Object>) record).getKey();
-	}
+    @Override
+    public void delete(Record record) {
+        map.remove(((FastMap.Entry<E, Object>) record).getKey());
+    }
 
-	@Override
-	public void delete(Record record)
-	{
-		map.remove(((FastMap.Entry<E, Object>) record).getKey());
-	}
+    @Override
+    public void delete(Record record, E value) {
+        map.remove(value);
+    }
 
-	@Override
-	public void delete(Record record, E value)
-	{
-		map.remove(value);
-	}
+    public boolean add(E value) {
+        return map.put(value, NULL) == null;
+    }
 
-	public boolean add(E value)
-	{
-		return map.put(value, NULL) == null;
-	}
+    public void clear() {
+        map.clear();
+    }
 
-	public void clear()
-	{
-		map.clear();
-	}
+    public boolean contains(Object o) {
+        return map.containsKey(o);
+    }
 
-	public boolean contains(Object o)
-	{
-		return map.containsKey(o);
-	}
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
 
-	public boolean isEmpty()
-	{
-		return map.isEmpty();
-	}
+    public Iterator<E> iterator() {
+        return map.keySet().iterator();
+    }
 
-	public Iterator<E> iterator()
-	{
-		return map.keySet().iterator();
-	}
+    public boolean remove(Object o) {
+        return map.remove(o) != null;
+    }
 
-	public boolean remove(Object o)
-	{
-		return map.remove(o) != null;
-	}
+    public int size() {
+        return map.size();
+    }
 
-	public int size()
-	{
-		return map.size();
-	}
-
-	@Override
-	public String toString()
-	{
-		return super.toString() + "-" + map.keySet().toString();
-	}
+    @Override
+    public String toString() {
+        return super.toString() + "-" + map.keySet().toString();
+    }
 }

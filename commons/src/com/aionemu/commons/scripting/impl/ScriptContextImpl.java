@@ -31,386 +31,329 @@ import com.aionemu.commons.scripting.classlistener.ClassListener;
 import com.aionemu.commons.scripting.classlistener.DefaultClassListener;
 
 /**
- * This class is actual implementation of {@link com.aionemu.commons.scripting.ScriptContext}
- * 
+ * This class is actual implementation of
+ * {@link com.aionemu.commons.scripting.ScriptContext}
+ *
  * @author SoulKeeper
  */
-public class ScriptContextImpl implements ScriptContext
-{
-	/**
-	 * logger for this class
-	 */
-	private static final Logger	log	= Logger.getLogger(ScriptContextImpl.class);
+public class ScriptContextImpl implements ScriptContext {
 
-	/**
-	 * Script context that is parent for this script context
-	 */
-	private final ScriptContext	parentScriptContext;
+    /**
+     * logger for this class
+     */
+    private static final Logger log = Logger.getLogger(ScriptContextImpl.class);
+    /**
+     * Script context that is parent for this script context
+     */
+    private final ScriptContext parentScriptContext;
+    /**
+     * Libraries (list of jar files) that have to be loaded class loader
+     */
+    private Iterable<File> libraries;
+    /**
+     * Root directory of this script context. It and it's subdirectories will be
+     * scanned for .java files.
+     */
+    private final File root;
+    /**
+     * Result of compilation of script context
+     */
+    private CompilationResult compilationResult;
+    /**
+     * List of child script contexts
+     */
+    private Set<ScriptContext> childScriptContexts;
+    /**
+     * Classlistener for this script context
+     */
+    private ClassListener classListener;
+    /**
+     * Class name of the compiler that will be used to compile sources
+     */
+    private String compilerClassName;
 
-	/**
-	 * Libraries (list of jar files) that have to be loaded class loader
-	 */
-	private Iterable<File>		libraries;
+    /**
+     * Creates new scriptcontext with given root file
+     *
+     * @param root file that represents root directory of this script context
+     * @throws NullPointerException if root is null
+     * @throws IllegalArgumentException if root directory doesn't exists or is
+     * not a directory
+     */
+    public ScriptContextImpl(File root) {
+        this(root, null);
+    }
 
-	/**
-	 * Root directory of this script context. It and it's subdirectories will be scanned for .java files.
-	 */
-	private final File			root;
+    /**
+     * Creates new ScriptContext with given file as root and another
+     * ScriptContext as parent
+     *
+     * @param root file that represents root directory of this script context
+     * @param parent parent ScriptContex. It's classes and libraries will be
+     * accessible for this script context
+     * @throws NullPointerException if root is null
+     * @throws IllegalArgumentException if root directory doesn't exists or is
+     * not a directory
+     */
+    public ScriptContextImpl(File root, ScriptContext parent) {
+        if (root == null) {
+            throw new NullPointerException("Root file must be specified");
+        }
 
-	/**
-	 * Result of compilation of script context
-	 */
-	private CompilationResult	compilationResult;
+        if (!root.exists() || !root.isDirectory()) {
+            throw new IllegalArgumentException("Root directory not exists or is not a directory");
+        }
 
-	/**
-	 * List of child script contexts
-	 */
-	private Set<ScriptContext>	childScriptContexts;
+        this.root = root;
+        this.parentScriptContext = parent;
+    }
 
-	/**
-	 * Classlistener for this script context
-	 */
-	private ClassListener		classListener;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void init() {
 
-	/**
-	 * Class name of the compiler that will be used to compile sources
-	 */
-	private String				compilerClassName;
+        if (compilationResult != null) {
+            log.error(new Exception("Init request on initialized ScriptContext"));
+            return;
+        }
 
-	/**
-	 * Creates new scriptcontext with given root file
-	 * 
-	 * @param root
-	 *            file that represents root directory of this script context
-	 * @throws NullPointerException
-	 *             if root is null
-	 * @throws IllegalArgumentException
-	 *             if root directory doesn't exists or is not a directory
-	 */
-	public ScriptContextImpl(File root)
-	{
-		this(root, null);
-	}
+        ScriptCompiler scriptCompiler = instantiateCompiler();
 
-	/**
-	 * Creates new ScriptContext with given file as root and another ScriptContext as parent
-	 * 
-	 * @param root
-	 *            file that represents root directory of this script context
-	 * @param parent
-	 *            parent ScriptContex. It's classes and libraries will be accessible for this script context
-	 * @throws NullPointerException
-	 *             if root is null
-	 * @throws IllegalArgumentException
-	 *             if root directory doesn't exists or is not a directory
-	 */
-	public ScriptContextImpl(File root, ScriptContext parent)
-	{
-		if(root == null)
-		{
-			throw new NullPointerException("Root file must be specified");
-		}
+        @SuppressWarnings("unchecked")
+        Collection<File> files = FileUtils.listFiles(root, scriptCompiler.getSupportedFileTypes(), true);
 
-		if(!root.exists() || !root.isDirectory())
-		{
-			throw new IllegalArgumentException("Root directory not exists or is not a directory");
-		}
+        if (parentScriptContext != null) {
+            scriptCompiler.setParentClassLoader(parentScriptContext.getCompilationResult().getClassLoader());
+        }
 
-		this.root = root;
-		this.parentScriptContext = parent;
-	}
+        scriptCompiler.setLibraires(libraries);
+        compilationResult = scriptCompiler.compile(files);
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public synchronized void init()
-	{
+        getClassListener().postLoad(compilationResult.getCompiledClasses());
 
-		if(compilationResult != null)
-		{
-			log.error(new Exception("Init request on initialized ScriptContext"));
-			return;
-		}
+        if (childScriptContexts != null) {
+            for (ScriptContext context : childScriptContexts) {
+                context.init();
+            }
+        }
+    }
 
-		ScriptCompiler scriptCompiler = instantiateCompiler();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void shutdown() {
 
-		@SuppressWarnings("unchecked")
-		Collection<File> files = FileUtils.listFiles(root, scriptCompiler.getSupportedFileTypes(), true);
+        if (compilationResult == null) {
+            log.error("Shutdown of not initialized stript context", new Exception());
+            return;
+        }
 
-		if(parentScriptContext != null)
-		{
-			scriptCompiler.setParentClassLoader(parentScriptContext.getCompilationResult().getClassLoader());
-		}
+        if (childScriptContexts != null) {
+            for (ScriptContext child : childScriptContexts) {
+                child.shutdown();
+            }
+        }
 
-		scriptCompiler.setLibraires(libraries);
-		compilationResult = scriptCompiler.compile(files);
+        getClassListener().preUnload(compilationResult.getCompiledClasses());
+        compilationResult = null;
+    }
 
-		getClassListener().postLoad(compilationResult.getCompiledClasses());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reload() {
+        shutdown();
+        init();
+    }
 
-		if(childScriptContexts != null)
-		{
-			for(ScriptContext context : childScriptContexts)
-			{
-				context.init();
-			}
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public File getRoot() {
+        return root;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public synchronized void shutdown()
-	{
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CompilationResult getCompilationResult() {
+        return compilationResult;
+    }
 
-		if(compilationResult == null)
-		{
-			log.error("Shutdown of not initialized stript context", new Exception());
-			return;
-		}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized boolean isInitialized() {
+        return compilationResult != null;
+    }
 
-		if(childScriptContexts != null)
-		{
-			for(ScriptContext child : childScriptContexts)
-			{
-				child.shutdown();
-			}
-		}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setLibraries(Iterable<File> files) {
+        this.libraries = files;
+    }
 
-		getClassListener().preUnload(compilationResult.getCompiledClasses());
-		compilationResult = null;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterable<File> getLibraries() {
+        return libraries;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void reload()
-	{
-		shutdown();
-		init();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ScriptContext getParentScriptContext() {
+        return parentScriptContext;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public File getRoot()
-	{
-		return root;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<ScriptContext> getChildScriptContexts() {
+        return childScriptContexts;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public CompilationResult getCompilationResult()
-	{
-		return compilationResult;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addChildScriptContext(ScriptContext context) {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public synchronized boolean isInitialized()
-	{
-		return compilationResult != null;
-	}
+        synchronized (this) {
+            if (childScriptContexts == null) {
+                childScriptContexts = new HashSet<ScriptContext>();
+            }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setLibraries(Iterable<File> files)
-	{
-		this.libraries = files;
-	}
+            if (childScriptContexts.contains(context)) {
+                log.error("Double child definition, root: " + root.getAbsolutePath() + ", child: "
+                        + context.getRoot().getAbsolutePath());
+                return;
+            }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Iterable<File> getLibraries()
-	{
-		return libraries;
-	}
+            if (isInitialized()) {
+                context.init();
+            }
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ScriptContext getParentScriptContext()
-	{
-		return parentScriptContext;
-	}
+        childScriptContexts.add(context);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Collection<ScriptContext> getChildScriptContexts()
-	{
-		return childScriptContexts;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setClassListener(ClassListener cl) {
+        classListener = cl;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void addChildScriptContext(ScriptContext context)
-	{
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ClassListener getClassListener() {
+        if (classListener == null) {
+            if (getParentScriptContext() == null) {
+                setClassListener(new DefaultClassListener());
+                return classListener;
+            } else {
+                return getParentScriptContext().getClassListener();
+            }
+        } else {
+            return classListener;
+        }
+    }
 
-		synchronized(this)
-		{
-			if(childScriptContexts == null)
-			{
-				childScriptContexts = new HashSet<ScriptContext>();
-			}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setCompilerClassName(String className) {
+        this.compilerClassName = className;
+    }
 
-			if(childScriptContexts.contains(context))
-			{
-				log.error("Double child definition, root: " + root.getAbsolutePath() + ", child: "
-					+ context.getRoot().getAbsolutePath());
-				return;
-			}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCompilerClassName() {
+        return this.compilerClassName;
+    }
 
-			if(isInitialized())
-			{
-				context.init();
-			}
-		}
+    /**
+     * Creates new instance of ScriptCompiler that should be used with this
+     * ScriptContext
+     *
+     * @return instance of ScriptCompiler
+     * @throws RuntimeException if failed to create instance
+     */
+    protected ScriptCompiler instantiateCompiler() throws RuntimeException {
+        ClassLoader cl = getClass().getClassLoader();
+        if (getParentScriptContext() != null) {
+            cl = getParentScriptContext().getCompilationResult().getClassLoader();
+        }
 
-		childScriptContexts.add(context);
-	}
+        ScriptCompiler sc;
+        try {
+            sc = (ScriptCompiler) Class.forName(getCompilerClassName(), true, cl).newInstance();
+        } catch (Exception e) {
+            RuntimeException e1 = new RuntimeException("Can't create instance of compiler", e);
+            log.error(e1);
+            throw e1;
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setClassListener(ClassListener cl)
-	{
-		classListener = cl;
-	}
+        return sc;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ClassListener getClassListener()
-	{
-		if(classListener == null)
-		{
-			if(getParentScriptContext() == null)
-			{
-				setClassListener(new DefaultClassListener());
-				return classListener;
-			}
-			else
-			{
-				return getParentScriptContext().getClassListener();
-			}
-		}
-		else
-		{
-			return classListener;
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ScriptContextImpl)) {
+            return false;
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setCompilerClassName(String className)
-	{
-		this.compilerClassName = className;
-	}
+        ScriptContextImpl another = (ScriptContextImpl) obj;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getCompilerClassName()
-	{
-		return this.compilerClassName;
-	}
+        if (parentScriptContext == null) {
+            return another.getRoot().equals(root);
+        } else {
+            return another.getRoot().equals(root) && parentScriptContext.equals(another.parentScriptContext);
+        }
+    }
 
-	/**
-	 * Creates new instance of ScriptCompiler that should be used with this ScriptContext
-	 * 
-	 * @return instance of ScriptCompiler
-	 * @throws RuntimeException
-	 *             if failed to create instance
-	 */
-	protected ScriptCompiler instantiateCompiler() throws RuntimeException
-	{
-		ClassLoader cl = getClass().getClassLoader();
-		if(getParentScriptContext() != null)
-		{
-			cl = getParentScriptContext().getCompilationResult().getClassLoader();
-		}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = parentScriptContext != null ? parentScriptContext.hashCode() : 0;
+        result = 31 * result + root.hashCode();
+        return result;
+    }
 
-		ScriptCompiler sc;
-		try
-		{
-			sc = (ScriptCompiler) Class.forName(getCompilerClassName(), true, cl).newInstance();
-		}
-		catch(Exception e)
-		{
-			RuntimeException e1 = new RuntimeException("Can't create instance of compiler", e);
-			log.error(e1);
-			throw e1;
-		}
-
-		return sc;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj)
-	{
-		if(!(obj instanceof ScriptContextImpl))
-		{
-			return false;
-		}
-
-		ScriptContextImpl another = (ScriptContextImpl) obj;
-
-		if(parentScriptContext == null)
-		{
-			return another.getRoot().equals(root);
-		}
-		else
-		{
-			return another.getRoot().equals(root) && parentScriptContext.equals(another.parentScriptContext);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int hashCode()
-	{
-		int result = parentScriptContext != null ? parentScriptContext.hashCode() : 0;
-		result = 31 * result + root.hashCode();
-		return result;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void finalize() throws Throwable
-	{
-		if(compilationResult != null)
-		{
-			log.error("Finalization of initialized ScriptContext. Forcing context shutdown.");
-			shutdown();
-		}
-		super.finalize();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void finalize() throws Throwable {
+        if (compilationResult != null) {
+            log.error("Finalization of initialized ScriptContext. Forcing context shutdown.");
+            shutdown();
+        }
+        super.finalize();
+    }
 }

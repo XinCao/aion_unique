@@ -21,50 +21,55 @@ import com.aionemu.commons.callbacks.CallbackResult;
 
 /**
  * ScriptManager reload listener
- * 
+ *
  * @see com.aionemu.commons.scripting.scriptmanager.ScriptManager#reload()
- * 
+ *
  * @author SoulKeeper, Aquanox
  */
 @SuppressWarnings("unchecked")
-public abstract class ReloadListener implements Callback
-{
-	/** {@inheritDoc} */
-	@Override
-	public final CallbackResult beforeCall(Object obj, Object[] args)
-	{
-		beforeReload();
-		return CallbackResult.newContinue();
-	}
+public abstract class ReloadListener implements Callback {
 
-	/** {@inheritDoc} */
-	@Override
-	public final CallbackResult afterCall(Object obj, Object[] args, Object methodResult)
-	{
-		afterReload();
-		return CallbackResult.newContinue();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult beforeCall(Object obj, Object[] args) {
+        beforeReload();
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * Invoked before {@link com.aionemu.commons.scripting.scriptmanager.ScriptManager#reload()} execution
-	 */
-	protected void beforeReload()
-	{
-		// empty
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult afterCall(Object obj, Object[] args, Object methodResult) {
+        afterReload();
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * Invoked after {@link com.aionemu.commons.scripting.scriptmanager.ScriptManager#reload()} execution
-	 */
-	protected void afterReload()
-	{
-		// empty
-	}
+    /**
+     * Invoked before
+     * {@link com.aionemu.commons.scripting.scriptmanager.ScriptManager#reload()}
+     * execution
+     */
+    protected void beforeReload() {
+        // empty
+    }
 
-	/** {@inheritDoc} */
-	@Override
-	public final Class getBaseClass()
-	{
-		return ReloadListener.class;
-	}
+    /**
+     * Invoked after
+     * {@link com.aionemu.commons.scripting.scriptmanager.ScriptManager#reload()}
+     * execution
+     */
+    protected void afterReload() {
+        // empty
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class getBaseClass() {
+        return ReloadListener.class;
+    }
 }

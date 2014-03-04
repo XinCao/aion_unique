@@ -22,39 +22,36 @@ import com.aionemu.commons.scripting.ScriptContext;
 
 /**
  * ScriptContext creation listener for ScriptManager.<br>
- * 
- * @see com.aionemu.commons.scripting.scriptmanager.ScriptManager#createContext(com.aionemu.commons.scripting.scriptmanager.ScriptInfo
- *      , com.aionemu.commons.scripting.ScriptContext)
- * 
+ *
+ * @see
+ * com.aionemu.commons.scripting.scriptmanager.ScriptManager#createContext(com.aionemu.commons.scripting.scriptmanager.ScriptInfo
+ * , com.aionemu.commons.scripting.ScriptContext)
+ *
  * @author SoulKeeper
  */
 @SuppressWarnings("unchecked")
-public abstract class ContextCreationListener implements Callback
-{
-	@Override
-	public final CallbackResult beforeCall(Object obj, Object[] args)
-	{
-		return CallbackResult.newContinue();
-	}
+public abstract class ContextCreationListener implements Callback {
 
-	@Override
-	public final CallbackResult afterCall(Object obj, Object[] args, Object methodResult)
-	{
-		contextCreated((ScriptContext) methodResult);
-		return CallbackResult.newContinue();
-	}
+    @Override
+    public final CallbackResult beforeCall(Object obj, Object[] args) {
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * Invoked when new contexts was created
-	 * 
-	 * @param context
-	 *            object that was created
-	 */
-	protected abstract void contextCreated(ScriptContext context);
+    @Override
+    public final CallbackResult afterCall(Object obj, Object[] args, Object methodResult) {
+        contextCreated((ScriptContext) methodResult);
+        return CallbackResult.newContinue();
+    }
 
-	@Override
-	public final Class getBaseClass()
-	{
-		return ContextCreationListener.class;
-	}
+    /**
+     * Invoked when new contexts was created
+     *
+     * @param context object that was created
+     */
+    protected abstract void contextCreated(ScriptContext context);
+
+    @Override
+    public final Class getBaseClass() {
+        return ContextCreationListener.class;
+    }
 }

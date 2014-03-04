@@ -86,8 +86,7 @@ public abstract class BaseClientPacket<T extends AConnection> extends BasePacket
      * This method reads data from a packet buffer. If the error occurred while
      * reading data, the connection is closed.
      *
-     * @return <code>true</code> if reading was successful,
-     * otherwise <code>false</code>
+     * @return <code>true</code> if reading was successful,      * otherwise <code>false</code>
      *
      */
     public final boolean read() {
