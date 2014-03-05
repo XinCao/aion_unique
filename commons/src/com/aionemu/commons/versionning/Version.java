@@ -27,8 +27,9 @@ import java.util.jar.Manifest;
 import org.apache.log4j.Logger;
 
 /**
- * @author lord_rex
- *
+ * 读取 Manifest Info
+ * 
+ * @author caoxin
  */
 public class Version {
 
@@ -43,23 +44,22 @@ public class Version {
         loadInformation(c);
     }
 
-    public void loadInformation(Class<?> c) {
+    /**
+     * 获得jar file 版本信息
+     * 
+     * @param c 
+     */
+    public final void loadInformation(Class<?> c) {
         File jarName = null;
         try {
             jarName = Locator.getClassSource(c);
             JarFile jarFile = new JarFile(jarName);
-
             Attributes attrs = jarFile.getManifest().getMainAttributes();
-
             setRevision(attrs);
-
             setDate(attrs);
-
         } catch (IOException e) {
-            log.error("Unable to get Soft information\nFile name '"
-                    + (jarName == null ? "null" : jarName.getAbsolutePath()) + "' isn't a valid jar", e);
+            log.error("Unable to get Soft information\nFile name '" + (jarName == null ? "null" : jarName.getAbsolutePath()) + "' isn't a valid jar", e);
         }
-
     }
 
     public void transferInfo(String jarName, String type, File fileToWrite) {
@@ -83,7 +83,6 @@ public class Version {
 
     public void setRevision(Attributes attrs) {
         String revision = attrs.getValue("Revision");
-
         if (revision != null) {
             this.revision = revision;
         } else {
@@ -97,7 +96,6 @@ public class Version {
 
     public void setDate(Attributes attrs) {
         String date = attrs.getValue("Date");
-
         if (date != null) {
             this.date = date;
         } else {

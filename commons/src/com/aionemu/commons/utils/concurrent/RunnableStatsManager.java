@@ -33,7 +33,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 /**
- * @author NB4L1
+ * @方法性能分析
+ * 
  */
 @SuppressWarnings("unchecked")
 public final class RunnableStatsManager {
@@ -44,6 +45,9 @@ public final class RunnableStatsManager {
     private static final Logger log = Logger.getLogger(RunnableStatsManager.class);
     private static final Map<Class<?>, ClassStat> classStats = new HashMap<Class<?>, ClassStat>();
 
+    /**
+     * 类统计
+     */
     private static final class ClassStat {
 
         private final String className;
@@ -54,10 +58,8 @@ public final class RunnableStatsManager {
         private ClassStat(Class<?> clazz) {
             className = clazz.getName().replace("com.aionemu.gameserver.", "");
             runnableStat = new MethodStat(className, "run()");
-
             methodNames = new String[]{"run()"};
             methodStats = new MethodStat[]{runnableStat};
-
             classStats.put(clazz, this);
         }
 
@@ -65,35 +67,39 @@ public final class RunnableStatsManager {
             return runnableStat;
         }
 
+        /**
+         * 挺有趣的解决线程安全问题
+         * 
+         * @param methodName
+         * @param synchronizedAlready
+         * @return 
+         */
         private MethodStat getMethodStat(String methodName, boolean synchronizedAlready) {
             // method names will be interned automatically because of compiling, so this gonna work
-            if (methodName == "run()") {
+            if ("run()".equals(methodName)) {
                 return runnableStat;
             }
-
             for (int i = 0; i < methodNames.length; i++) {
                 if (methodNames[i].equals(methodName)) {
                     return methodStats[i];
                 }
             }
-
             if (!synchronizedAlready) {
                 synchronized (this) {
                     return getMethodStat(methodName, true);
                 }
             }
-
             methodName = methodName.intern();
-
             final MethodStat methodStat = new MethodStat(className, methodName);
-
             methodNames = (String[]) ArrayUtils.add(methodNames, methodName);
             methodStats = (MethodStat[]) ArrayUtils.add(methodStats, methodStat);
-
             return methodStat;
         }
     }
 
+    /**
+     * 方法（类）统计
+     */
     private static final class MethodStat {
 
         private final ReentrantLock lock = new ReentrantLock();
@@ -124,17 +130,14 @@ public final class RunnableStatsManager {
 
     private static ClassStat getClassStat(Class<?> clazz, boolean synchronizedAlready) {
         ClassStat classStat = classStats.get(clazz);
-
         if (classStat != null) {
             return classStat;
         }
-
         if (!synchronizedAlready) {
             synchronized (RunnableStatsManager.class) {
                 return getClassStat(clazz, true);
             }
         }
-
         return new ClassStat(clazz);
     }
 
@@ -161,25 +164,21 @@ public final class RunnableStatsManager {
             this.xmlAttributeName = xmlAttributeName;
         }
         private final Comparator<MethodStat> comparator = new Comparator<MethodStat>() {
+            @Override
             public int compare(MethodStat o1, MethodStat o2) {
                 final Comparable c1 = getComparableValueOf(o1);
                 final Comparable c2 = getComparableValueOf(o2);
-
                 if (c1 instanceof Number) {
                     return c2.compareTo(c1);
                 }
-
                 final String s1 = (String) c1;
                 final String s2 = (String) c2;
-
                 final int len1 = s1.length();
                 final int len2 = s2.length();
                 final int n = Math.min(len1, len2);
-
                 for (int k = 0; k < n; k++) {
                     char ch1 = s1.charAt(k);
                     char ch2 = s2.charAt(k);
-
                     if (ch1 != ch2) {
                         if (Character.isUpperCase(ch1) != Character
                                 .isUpperCase(ch2)) {
@@ -189,13 +188,10 @@ public final class RunnableStatsManager {
                         }
                     }
                 }
-
                 final int result = len1 - len2;
-
                 if (result != 0) {
                     return result;
                 }
-
                 switch (SortBy.this) {
                     case METHOD:
                         return NAME.comparator.compare(o1, o2);
@@ -244,85 +240,69 @@ public final class RunnableStatsManager {
                 }
             }
         }
-
         if (sortBy != null) {
             Collections.sort(methodStats, sortBy.comparator);
         }
-
         final List<String> lines = new ArrayList<String>();
-
         lines.add("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
         lines.add("<entries>");
         lines.add("\t<!-- This XML contains statistics about execution times. -->");
         lines.add("\t<!-- Submitted results will help the developers to optimize the server. -->");
-
+        /**
+         * 每种排序类型，对应的最大方法
+         */
         final String[][] values = new String[SortBy.VALUES.length][methodStats.size()];
         final int[] maxLength = new int[SortBy.VALUES.length];
-
         for (int i = 0; i < SortBy.VALUES.length; i++) {
             final SortBy sort = SortBy.VALUES[i];
-
             for (int k = 0; k < methodStats.size(); k++) {
                 final Comparable c = sort.getComparableValueOf(methodStats.get(k));
-
                 final String value;
-
                 if (c instanceof Number) {
                     value = NumberFormat.getInstance(Locale.ENGLISH).format(((Number) c).longValue());
                 } else {
                     value = String.valueOf(c);
                 }
-
                 values[i][k] = value;
-
                 maxLength[i] = Math.max(maxLength[i], value.length());
             }
         }
-
         for (int k = 0; k < methodStats.size(); k++) {
             StringBuilder sb = new StringBuilder();
             sb.append("\t<entry ");
-
             EnumSet<SortBy> set = EnumSet.allOf(SortBy.class);
-
             if (sortBy != null) {
                 switch (sortBy) {
-                    case NAME:
-                    case METHOD:
-                        appendAttribute(sb, SortBy.NAME, values[SortBy.NAME.ordinal()][k], maxLength[SortBy.NAME
-                                .ordinal()]);
+                    case NAME: {
+                        
+                    } case METHOD: {
+                        appendAttribute(sb, SortBy.NAME, values[SortBy.NAME.ordinal()][k], maxLength[SortBy.NAME.ordinal()]);
                         set.remove(SortBy.NAME);
-
-                        appendAttribute(sb, SortBy.METHOD, values[SortBy.METHOD.ordinal()][k], maxLength[SortBy.METHOD
-                                .ordinal()]);
+                        appendAttribute(sb, SortBy.METHOD, values[SortBy.METHOD.ordinal()][k], maxLength[SortBy.METHOD.ordinal()]);
                         set.remove(SortBy.METHOD);
                         break;
-                    default:
+                    } default: {
                         appendAttribute(sb, sortBy, values[sortBy.ordinal()][k], maxLength[sortBy.ordinal()]);
                         set.remove(sortBy);
                         break;
+                    }
                 }
             }
-
             for (SortBy sort : SortBy.VALUES) {
                 if (set.contains(sort)) {
                     appendAttribute(sb, sort, values[sort.ordinal()][k], maxLength[sort.ordinal()]);
                 }
             }
-
             sb.append("/>");
-
             lines.add(sb.toString());
         }
-
         lines.add("</entries>");
-
         PrintStream ps = null;
         try {
             ps = new PrintStream("MethodStats-" + System.currentTimeMillis() + ".log");
-
             for (String line : lines) {
-                ps.println(line);
+//                ps.println(line);
+                System.out.println(line);
             }
         } catch (Exception e) {
             log.warn("", e);
@@ -334,21 +314,26 @@ public final class RunnableStatsManager {
     private static void appendAttribute(StringBuilder sb, SortBy sortBy, String value, int fillTo) {
         sb.append(sortBy.xmlAttributeName);
         sb.append("=");
-
         if (sortBy != SortBy.NAME && sortBy != SortBy.METHOD) {
             for (int i = value.length(); i < fillTo; i++) {
                 sb.append(" ");
             }
         }
-
         sb.append("\"");
         sb.append(value);
         sb.append("\" ");
-
         if (sortBy == SortBy.NAME || sortBy == SortBy.METHOD) {
             for (int i = value.length(); i < fillTo; i++) {
                 sb.append(" ");
             }
         }
+    }
+    
+    public static void main(String ...args) {
+        handleStats(RunnableStatsManager.class, "runA()", 1);
+        handleStats(RunnableStatsManager.class, "runA()", 2);
+        handleStats(RunnableStatsManager.class, "runA()", 3);
+        handleStats(RunnableStatsManager.class, "runA()", 4);
+        dumpClassStats(null);
     }
 }

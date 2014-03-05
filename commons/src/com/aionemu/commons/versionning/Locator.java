@@ -25,16 +25,12 @@ import java.text.StringCharacterIterator;
 import java.util.Locale;
 
 /**
- * The Locator is a utility class which is used to find certain items in the
- * environment.
+ * The Locator is a utility class which is used to find certain items in the environment.（文件定位器）
  *
  * @since Ant 1.6
  */
 public final class Locator {
 
-    /**
-     * Not instantiable
-     */
     private Locator() {
     }
 
@@ -67,7 +63,7 @@ public final class Locator {
         if (c == null) {
             c = Locator.class.getClassLoader();
         }
-        URL url = null;
+        URL url;
         if (c == null) {
             url = ClassLoader.getSystemResource(resource);
         } else {
@@ -115,18 +111,15 @@ public final class Locator {
         if (url == null || !("file".equals(url.getProtocol()))) {
             throw new IllegalArgumentException("Can only handle valid file: URIs");
         }
-        StringBuffer buf = new StringBuffer(url.getHost());
+        StringBuilder buf = new StringBuilder(url.getHost());
         if (buf.length() > 0) {
             buf.insert(0, File.separatorChar).insert(0, File.separatorChar);
         }
         String file = url.getFile();
         int queryPos = file.indexOf('?');
         buf.append((queryPos < 0) ? file : file.substring(0, queryPos));
-
         uri = buf.toString().replace('/', File.separatorChar);
-
-        if (File.pathSeparatorChar == ';' && uri.startsWith("\\") && uri.length() > 2
-                && Character.isLetter(uri.charAt(1)) && uri.lastIndexOf(':') > -1) {
+        if (File.pathSeparatorChar == ';' && uri.startsWith("\\") && uri.length() > 2 && Character.isLetter(uri.charAt(1)) && uri.lastIndexOf(':') > -1) {
             uri = uri.substring(1);
         }
         String path = decodeUri(uri);
@@ -143,7 +136,7 @@ public final class Locator {
         if (uri.indexOf('%') == -1) {
             return uri;
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         CharacterIterator iter = new StringCharacterIterator(uri);
         for (char c = iter.first(); c != CharacterIterator.DONE; c = iter.next()) {
             if (c == '%') {
@@ -236,9 +229,7 @@ public final class Locator {
      * formed.
      */
     public static URL[] getLocationURLs(File location, final String[] extensions) throws MalformedURLException {
-
         URL[] urls = new URL[0];
-
         if (!location.exists()) {
             return urls;
         }
@@ -254,6 +245,7 @@ public final class Locator {
             return urls;
         }
         File[] matches = location.listFiles(new FilenameFilter() {
+            @Override
             public boolean accept(File dir, String name) {
                 for (int i = 0; i < extensions.length; ++i) {
                     if (name.toLowerCase().endsWith(extensions[i])) {

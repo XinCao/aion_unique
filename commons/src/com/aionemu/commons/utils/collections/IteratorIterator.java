@@ -86,7 +86,6 @@ public class IteratorIterator<V> implements Iterator<V> {
         if (secondLevelIterator != null && secondLevelIterator.hasNext()) {
             return true;
         }
-
         while (firstLevelIterator.hasNext()) {
             Iterable<V> iterable = firstLevelIterator.next();
 

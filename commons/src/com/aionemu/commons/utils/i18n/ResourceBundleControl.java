@@ -87,16 +87,13 @@ public class ResourceBundleControl extends ResourceBundle.Control {
      * {@inheritDoc}
      */
     @Override
-    public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException {
+    public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
         String bundleName = toBundleName(baseName, locale);
         ResourceBundle bundle = null;
         if (format.equals("java.class")) {
             try {
                 @SuppressWarnings({"unchecked"})
-                Class<? extends ResourceBundle> bundleClass = (Class<? extends ResourceBundle>) loader
-                        .loadClass(bundleName);
-
+                Class<? extends ResourceBundle> bundleClass = (Class<? extends ResourceBundle>) loader.loadClass(bundleName);
                 // If the class isn't a ResourceBundle subclass, throw a
                 // ClassCastException.
                 if (ResourceBundle.class.isAssignableFrom(bundleClass)) {

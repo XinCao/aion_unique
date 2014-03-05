@@ -23,7 +23,9 @@ import org.apache.log4j.Logger;
 import javolution.text.TextBuilder;
 
 /**
- * @author NB4L1
+ * 当线程执行花费时间过长时，进行通知
+ * 
+ * @author caoxin
  */
 public class ExecuteWrapper implements Runnable {
 
@@ -49,7 +51,6 @@ public class ExecuteWrapper implements Runnable {
 
     public static void execute(Runnable runnable, long maximumRuntimeInMillisecWithoutWarning) {
         long begin = System.nanoTime();
-
         try {
             runnable.run();
         } catch (RuntimeException e) {
@@ -57,23 +58,36 @@ public class ExecuteWrapper implements Runnable {
         } finally {
             long runtimeInNanosec = System.nanoTime() - begin;
             Class<? extends Runnable> clazz = runnable.getClass();
-
             RunnableStatsManager.handleStats(clazz, runtimeInNanosec);
-
             long runtimeInMillisec = TimeUnit.NANOSECONDS.toMillis(runtimeInNanosec);
-
             if (runtimeInMillisec > maximumRuntimeInMillisecWithoutWarning) {
                 TextBuilder tb = TextBuilder.newInstance();
-
                 tb.append(clazz);
                 tb.append(" - execution time: ");
                 tb.append(runtimeInMillisec);
                 tb.append("msec");
-
                 log.warn(tb);
-
                 TextBuilder.recycle(tb);
             }
         }
+    }
+    
+    private static class TestRunabled implements Runnable {
+    
+        private final int sleepTime = 30 * 1000;
+        
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(sleepTime);
+                 System.out.println("hello world!");
+            } catch (InterruptedException ex) {
+            }
+        }
+    }
+    
+    public static void main(String ...args) {
+        ExecuteWrapper executeWrapper = new ExecuteWrapper(new TestRunabled());
+        executeWrapper.run();
     }
 }

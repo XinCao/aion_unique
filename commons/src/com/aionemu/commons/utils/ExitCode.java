@@ -23,11 +23,7 @@ package com.aionemu.commons.utils;
  */
 public final class ExitCode {
 
-    /**
-     * Private constructor to avoid instantiation
-     */
-    private ExitCode() {
-    }
+    private ExitCode() {}
     /**
      * Indicates that server successfully finished it's work
      */
