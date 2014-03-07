@@ -78,7 +78,7 @@ public class DeadLockDetector extends Thread {
         boolean deadlock = false;
         while (!deadlock) {
             try {
-                long[] ids = tmx.findDeadlockedThreads();
+                long[] ids = tmx.findDeadlockedThreads(); // 查找死锁
                 if (ids != null) {
                     /**
                      * deadlock found :/

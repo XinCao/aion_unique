@@ -31,10 +31,15 @@ import com.aionemu.commons.utils.ClassUtils;
  */
 class DAOLoader extends DefaultClassListener implements ClassListener {
 
+
+    /**
+     * 对所有的DAO进行注册
+     * 
+     * @param classes 
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void postLoad(Class<?>[] classes) {
-        // Register DAOs
         for (Class<?> clazz : classes) {
             if (!isValidDAO(clazz)) {
                 continue;
@@ -50,6 +55,11 @@ class DAOLoader extends DefaultClassListener implements ClassListener {
         super.postLoad(classes);
     }
 
+    /**
+     * 对所有DAO进行卸载
+     * 
+     * @param classes 
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void preUnload(Class<?>[] classes) {
@@ -61,7 +71,6 @@ class DAOLoader extends DefaultClassListener implements ClassListener {
             if (!isValidDAO(clazz)) {
                 continue;
             }
-
             try {
                 DAOManager.unregisterDAO((Class<? extends DAO>) clazz);
             } catch (Exception e) {
@@ -78,17 +87,13 @@ class DAOLoader extends DefaultClassListener implements ClassListener {
         if (!ClassUtils.isSubclass(clazz, DAO.class)) {
             return false;
         }
-
         final int modifiers = clazz.getModifiers();
-
         if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
             return false;
         }
-
         if (!Modifier.isPublic(modifiers)) {
             return false;
         }
-
         if (clazz.isAnnotationPresent(DisabledDAO.class)) {
             return false;
         }

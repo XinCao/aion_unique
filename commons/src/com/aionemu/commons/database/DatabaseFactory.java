@@ -83,29 +83,22 @@ public class DatabaseFactory {
         if (dataSource != null) {
             return;
         }
-
         DatabaseConfig.load();
-
         try {
             DatabaseConfig.DATABASE_DRIVER.newInstance();
         } catch (Exception e) {
             log.fatal("Error obtaining DB driver", e);
             throw new Error("DB Driver doesnt exist!");
         }
-
         connectionPool = new GenericObjectPool();
-
         if (DatabaseConfig.DATABASE_CONNECTIONS_MIN > DatabaseConfig.DATABASE_CONNECTIONS_MAX) {
             log.error("Please check your database configuration. Minimum amount of connections is > maximum");
             DatabaseConfig.DATABASE_CONNECTIONS_MAX = DatabaseConfig.DATABASE_CONNECTIONS_MIN;
         }
-
         connectionPool.setMaxIdle(DatabaseConfig.DATABASE_CONNECTIONS_MIN);
         connectionPool.setMaxActive(DatabaseConfig.DATABASE_CONNECTIONS_MAX);
-
         /* test if connection is still valid before returning */
         connectionPool.setTestOnBorrow(true);
-
         try {
             dataSource = setupDataSource();
             Connection c = getConnection();
@@ -130,8 +123,7 @@ public class DatabaseFactory {
      */
     private static DataSource setupDataSource() throws Exception {
         // Create Connection Factory
-        ConnectionFactory conFactory = new DriverManagerConnectionFactory(DatabaseConfig.DATABASE_URL,
-                DatabaseConfig.DATABASE_USER, DatabaseConfig.DATABASE_PASSWORD);
+        ConnectionFactory conFactory = new DriverManagerConnectionFactory(DatabaseConfig.DATABASE_URL, DatabaseConfig.DATABASE_USER, DatabaseConfig.DATABASE_PASSWORD);
 
         // Makes Connection Factory Pool-able (Wrapper for two objects)
         // We are using our own implementation of PoolableConnectionFactory that use 1.6 Connection.isValid(timeout) for
@@ -222,10 +214,5 @@ public class DatabaseFactory {
         return databaseMinorVersion;
     }
 
-    /**
-     * Default constructor.
-     */
-    private DatabaseFactory() {
-        //
-    }
+    private DatabaseFactory() {}
 }

@@ -81,7 +81,6 @@ public class DatabaseConfig {
      * Loads database configuration
      */
     public static void load() {
-
         Properties p;
         try {
             p = PropertiesUtils.load(CONFIG_FILE);

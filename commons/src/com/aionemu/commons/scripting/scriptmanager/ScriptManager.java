@@ -82,9 +82,7 @@ public class ScriptManager {
     public synchronized void load(File scriptDescriptor) throws Exception {
         JAXBContext c = JAXBContext.newInstance(ScriptInfo.class, ScriptList.class);
         Unmarshaller u = c.createUnmarshaller();
-
         ScriptList list = (ScriptList) u.unmarshal(scriptDescriptor);
-
         for (ScriptInfo si : list.getScriptInfos()) {
             ScriptContext context = createContext(si, null);
             if (context != null) {

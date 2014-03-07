@@ -39,13 +39,7 @@ import com.aionemu.loginserver.network.gameserver.serverpackets.SM_REQUEST_KICK_
  */
 public class GameServerTable {
 
-    /**
-     * Logger for this class.
-     */
     private static final Logger log = Logger.getLogger(GameServerTable.class);
-    /**
-     * Map<Id,GameServer>
-     */
     private static Map<Byte, GameServerInfo> gameservers;
 
     /**
@@ -82,7 +76,6 @@ public class GameServerTable {
      */
     public static GsAuthResponse registerGameServer(GsConnection gsConnection, byte requestedId, byte[] defaultAddress, List<IPRange> ipRanges, int port, int maxPlayers, String password) {
         GameServerInfo gsi = gameservers.get(requestedId);
-
         /**
          * This id is not Registered at LoginServer.
          */
@@ -90,14 +83,12 @@ public class GameServerTable {
             log.info(gsConnection + " requestedID=" + requestedId + " not aviable!");
             return GsAuthResponse.NOT_AUTHED;
         }
-
         /**
          * Check if this GameServer is not already registered.
          */
         if (gsi.getGsConnection() != null) {
             return GsAuthResponse.ALREADY_REGISTERED;
         }
-
         /**
          * Check if password and ip are ok.
          */
@@ -105,13 +96,11 @@ public class GameServerTable {
             log.info(gsConnection + " wrong ip or password!");
             return GsAuthResponse.NOT_AUTHED;
         }
-
         gsi.setDefaultAddress(defaultAddress);
         gsi.setIpRanges(ipRanges);
         gsi.setPort(port);
         gsi.setMaxPlayers(maxPlayers);
         gsi.setGsConnection(gsConnection);
-
         gsConnection.setGameServerInfo(gsi);
         return GsAuthResponse.AUTHED;
     }

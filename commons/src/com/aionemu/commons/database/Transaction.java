@@ -123,7 +123,6 @@ public class Transaction {
      * @throws SQLException if something went wrongF
      */
     public void commit(Savepoint rollBackToOnError) throws SQLException {
-
         try {
             connection.commit();
         } catch (SQLException e) {
@@ -139,7 +138,6 @@ public class Transaction {
                 log.error("Can't rollback transaction", e1);
             }
         }
-
         connection.setAutoCommit(true);
         connection.close();
     }

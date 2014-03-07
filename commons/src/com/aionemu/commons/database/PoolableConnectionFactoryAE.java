@@ -21,7 +21,6 @@ import java.sql.SQLException;
 
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
-import org.apache.commons.pool.KeyedObjectPool;
 import org.apache.commons.pool.KeyedObjectPoolFactory;
 import org.apache.commons.pool.ObjectPool;
 
@@ -64,9 +63,7 @@ public class PoolableConnectionFactoryAE extends PoolableConnectionFactory {
      * @param defaultAutoCommit the default "auto commit" setting for returned
      * {@link Connection}s
      */
-    public PoolableConnectionFactoryAE(ConnectionFactory connFactory, ObjectPool pool,
-            KeyedObjectPoolFactory stmtPoolFactory, int validationTimeout, boolean defaultReadOnly,
-            boolean defaultAutoCommit) {
+    public PoolableConnectionFactoryAE(ConnectionFactory connFactory, ObjectPool pool, KeyedObjectPoolFactory stmtPoolFactory, int validationTimeout, boolean defaultReadOnly, boolean defaultAutoCommit) {
         super(connFactory, pool, stmtPoolFactory, null, defaultReadOnly, defaultAutoCommit);
         this.validationTimeout = validationTimeout;
     }

@@ -40,7 +40,6 @@ public class SM_REQUEST_KICK_ACCOUNT extends GsServerPacket {
      */
     public SM_REQUEST_KICK_ACCOUNT(int accountId) {
         super(0x02);
-
         this.accountId = accountId;
     }
 

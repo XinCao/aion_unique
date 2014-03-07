@@ -31,9 +31,6 @@ import com.aionemu.commons.scripting.metadata.OnClassUnload;
  */
 public class DefaultClassListener implements ClassListener {
 
-    /**
-     * Logger
-     */
     private static final Logger log = Logger.getLogger(DefaultClassListener.class);
 
     @Override
@@ -62,7 +59,6 @@ public class DefaultClassListener implements ClassListener {
             if (!Modifier.isStatic(m.getModifiers())) {
                 continue;
             }
-
             boolean accessible = m.isAccessible();
             m.setAccessible(true);
 
@@ -75,7 +71,6 @@ public class DefaultClassListener implements ClassListener {
                     log.error("Can't invoke method " + m.getName() + " of class " + m.getDeclaringClass().getName(), e);
                 }
             }
-
             m.setAccessible(accessible);
         }
     }

@@ -36,9 +36,6 @@ import com.aionemu.commons.scripting.scriptmanager.ScriptManager;
  */
 public class DAOManager {
 
-    /**
-     * Logger for DAOManager class
-     */
     private static final Logger log = Logger.getLogger(DAOManager.class);
     /**
      * Collection of registered DAOs
@@ -59,27 +56,16 @@ public class DAOManager {
             scriptManager.setGlobalClassListener(new DAOLoader());
             scriptManager.load(DatabaseConfig.DATABASE_SCRIPTCONTEXT_DESCRIPTOR);
         } catch (Exception e) {
-            throw new Error("Can't load database script context: " + DatabaseConfig.DATABASE_SCRIPTCONTEXT_DESCRIPTOR,
-                    e);
+            throw new Error("Can't load database script context: " + DatabaseConfig.DATABASE_SCRIPTCONTEXT_DESCRIPTOR, e);
         }
-
         log.info("Loaded " + daoMap.size() + " DAO implementations.");
-    }
-
-    /**
-     * Shutdown DAOManager
-     */
-    public static void shutdown() {
-        scriptManager.shutdown();
-        daoMap.clear();
-        scriptManager = null;
     }
 
     /**
      * Returns DAO implementation by DAO class. Typical usage:
      *
      * <pre>
-     * AccountDAO	dao	= DAOManager.getDAO(AccountDAO.class);
+     * AccountDAO dao = DAOManager.getDAO(AccountDAO.class);
      * </pre>
      *
      * @param clazz Abstract DAO class implementation of which was registered
@@ -89,15 +75,12 @@ public class DAOManager {
      */
     @SuppressWarnings("unchecked")
     public static <T extends DAO> T getDAO(Class<T> clazz) throws DAONotFoundException {
-
         DAO result = daoMap.get(clazz.getName());
-
         if (result == null) {
             String s = "DAO for class " + clazz.getName() + " not implemented";
             log.error(s);
             throw new DAONotFoundException(s);
         }
-
         return (T) result;
     }
 
@@ -118,14 +101,11 @@ public class DAOManager {
      * @throws InstantiationException if something went wrong during
      * instantiation of DAO
      */
-    public static void registerDAO(Class<? extends DAO> daoClass) throws DAOAlreadyRegisteredException,
-            IllegalAccessException, InstantiationException {
+    public static void registerDAO(Class<? extends DAO> daoClass) throws DAOAlreadyRegisteredException, IllegalAccessException, InstantiationException {
         DAO dao = daoClass.newInstance();
-
         if (!dao.supports(getDatabaseName(), getDatabaseMajorVersion(), getDatabaseMinorVersion())) {
             return;
         }
-
         synchronized (DAOManager.class) {
             DAO oldDao = daoMap.get(dao.getClassName());
             if (oldDao != null) {
@@ -140,7 +120,6 @@ public class DAOManager {
                 daoMap.put(dao.getClassName(), dao);
             }
         }
-
         if (log.isDebugEnabled()) {
             log.debug("DAO " + dao.getClassName() + " was successfuly registered.");
         }
@@ -156,18 +135,23 @@ public class DAOManager {
             for (DAO dao : daoMap.values()) {
                 if (dao.getClass() == daoClass) {
                     daoMap.remove(dao.getClassName());
-
                     if (log.isDebugEnabled()) {
                         log.debug("DAO " + dao.getClassName() + " was successfuly unregistered.");
                     }
-
                     break;
                 }
             }
         }
     }
 
-    private DAOManager() {
-        // empty
+    /**
+     * Shutdown DAOManager
+     */
+    public static void shutdown() {
+        scriptManager.shutdown();
+        daoMap.clear();
+        scriptManager = null;
     }
+
+    private DAOManager() {}
 }
