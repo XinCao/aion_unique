@@ -23,118 +23,103 @@ import com.aionemu.gameserver.model.templates.zone.ZoneTemplate;
 
 /**
  * @author ATracer
- * 
+ *
  */
-public class ZoneInstance
-{
-	private int							corners;
-	private float						xCoordinates[];
-	private float						yCoordinates[];
+public class ZoneInstance {
 
-	private ZoneTemplate				template;
+    private int corners;
+    private float xCoordinates[];
+    private float yCoordinates[];
+    private ZoneTemplate template;
+    private Collection<ZoneInstance> neighbors;
 
-	private Collection<ZoneInstance>	neighbors;
+    public ZoneInstance(ZoneTemplate template) {
+        this.template = template;
+        this.corners = template.getPoints().getPoint().size();
+        xCoordinates = new float[corners];
+        yCoordinates = new float[corners];
+        for (int i = 0; i < corners; i++) {
+            Point2D point = template.getPoints().getPoint().get(i);
+            xCoordinates[i] = point.getX();
+            yCoordinates[i] = point.getY();
+        }
+    }
 
-	public ZoneInstance(ZoneTemplate template)
-	{
-		this.template = template;
-		this.corners = template.getPoints().getPoint().size();
-		xCoordinates = new float[corners];
-		yCoordinates = new float[corners];
-		for(int i = 0; i < corners; i++)
-		{
-			Point2D point = template.getPoints().getPoint().get(i);
-			xCoordinates[i] = point.getX();
-			yCoordinates[i] = point.getY();
-		}
-	}
+    /**
+     * @return the corners
+     */
+    public int getCorners() {
+        return corners;
+    }
 
-	/**
-	 * @return the corners
-	 */
-	public int getCorners()
-	{
-		return corners;
-	}
+    /**
+     * @return the xCoordinates
+     */
+    public float[] getxCoordinates() {
+        return xCoordinates;
+    }
 
-	/**
-	 * @return the xCoordinates
-	 */
-	public float[] getxCoordinates()
-	{
-		return xCoordinates;
-	}
+    /**
+     * @return the yCoordinates
+     */
+    public float[] getyCoordinates() {
+        return yCoordinates;
+    }
 
-	/**
-	 * @return the yCoordinates
-	 */
-	public float[] getyCoordinates()
-	{
-		return yCoordinates;
-	}
+    /**
+     * @return the neighbours
+     */
+    public Collection<ZoneInstance> getNeighbors() {
+        return neighbors;
+    }
 
-	/**
-	 * @return the neighbours
-	 */
-	public Collection<ZoneInstance> getNeighbors()
-	{
-		return neighbors;
-	}
+    /**
+     * @param neighbours the neighbours to set
+     */
+    public void setNeighbors(Collection<ZoneInstance> neighbours) {
+        this.neighbors = neighbours;
+    }
 
-	/**
-	 * @param neighbours
-	 *            the neighbours to set
-	 */
-	public void setNeighbors(Collection<ZoneInstance> neighbours)
-	{
-		this.neighbors = neighbours;
-	}
+    /**
+     * @return the template
+     */
+    public ZoneTemplate getTemplate() {
+        return template;
+    }
 
-	/**
-	 * @return the template
-	 */
-	public ZoneTemplate getTemplate()
-	{
-		return template;
-	}
+    /**
+     * Top z coordinate
+     *
+     * @return
+     */
+    public float getTop() {
+        return template.getPoints().getTop();
+    }
 
-	/**
-	 * Top z coordinate
-	 * 
-	 * @return
-	 */
-	public float getTop()
-	{
-		return template.getPoints().getTop();
-	}
+    /**
+     * Bottom z coordinate
+     *
+     * @return
+     */
+    public float getBottom() {
+        return template.getPoints().getBottom();
+    }
 
-	/**
-	 * Bottom z coordinate
-	 * 
-	 * @return
-	 */
-	public float getBottom()
-	{
-		return template.getPoints().getBottom();
-	}
+    /**
+     * Is breathing zone (no drowning)
+     *
+     * @return
+     */
+    public boolean isBreath() {
+        return template.isBreath();
+    }
 
-	/**
-	 * Is breathing zone (no drowning)
-	 * 
-	 * @return
-	 */
-	public boolean isBreath()
-	{
-		return template.isBreath();
-	}
-
-	/**
-	 * Priority of zone in neighbors calculations
-	 * 
-	 * @return
-	 */
-	public int getPriority()
-	{
-		return template.getPriority();
-	}
+    /**
+     * Priority of zone in neighbors calculations
+     *
+     * @return
+     */
+    public int getPriority() {
+        return template.getPriority();
+    }
 }

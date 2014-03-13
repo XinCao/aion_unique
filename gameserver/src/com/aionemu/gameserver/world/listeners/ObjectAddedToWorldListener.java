@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aion-emu.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.aionemu.gameserver.world.listeners;
 
 import com.aionemu.commons.callbacks.Callback;
@@ -23,46 +22,41 @@ import com.aionemu.gameserver.model.gameobjects.VisibleObject;
 
 /**
  * Listener that is invoked after object was added to the world
- * 
+ *
  * @author SoulKeeper
  */
 @SuppressWarnings("unchecked")
-public abstract class ObjectAddedToWorldListener implements Callback
-{
+public abstract class ObjectAddedToWorldListener implements Callback {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final CallbackResult beforeCall(Object o, Object[] objects)
-	{
-		return CallbackResult.newContinue();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult beforeCall(Object o, Object[] objects) {
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final CallbackResult afterCall(Object o, Object[] objects, Object o1)
-	{
-		objectAdded((VisibleObject) objects[0]);
-		return CallbackResult.newContinue();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult afterCall(Object o, Object[] objects, Object o1) {
+        objectAdded((VisibleObject) objects[0]);
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final Class getBaseClass()
-	{
-		return ObjectAddedToWorldListener.class;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class getBaseClass() {
+        return ObjectAddedToWorldListener.class;
+    }
 
-	/**
-	 * Mehtod that is invoked after object has been added to the world
-	 * 
-	 * @param object
-	 *            Object that was added to the world
-	 */
-	protected abstract void objectAdded(VisibleObject object);
+    /**
+     * Mehtod that is invoked after object has been added to the world
+     *
+     * @param object Object that was added to the world
+     */
+    protected abstract void objectAdded(VisibleObject object);
 }

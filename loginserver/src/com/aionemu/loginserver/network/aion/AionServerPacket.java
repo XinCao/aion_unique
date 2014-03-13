@@ -47,7 +47,7 @@ public abstract class AionServerPacket extends BaseServerPacket {
         buf.putShort((short) 0);
         ByteBuffer b = buf.slice();
         short size = (short) (con.encrypt(b) + 2);
-        buf.putShort(0, size);
+        buf.putShort(0, size); // 对称加密包（感觉没有将，协议ID加密进去）
         buf.position(0).limit(size);
     }
 

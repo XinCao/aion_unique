@@ -78,512 +78,480 @@ import com.aionemu.gameserver.world.WorldPosition;
 import com.google.inject.Inject;
 
 /**
- * 
- * This class is designed to do all the work related with loading/storing players.<br>
- * Same with storing, {@link #storePlayer(com.aionemu.gameserver.model.gameobjects.player.Player)} stores all player
- * data like appearance, items, etc...
- * 
+ *
+ * This class is designed to do all the work related with loading/storing
+ * players.<br>
+ * Same with storing,
+ * {@link #storePlayer(com.aionemu.gameserver.model.gameobjects.player.Player)}
+ * stores all player data like appearance, items, etc...
+ *
  * @author SoulKeeper, Saelya
  */
-public class PlayerService
-{
-	private static final Logger			log			= Logger.getLogger(PlayerService.class);
-	private CacheMap<Integer, Player>	playerCache	= CacheMapFactory.createSoftCacheMap("Player", "player");
+public class PlayerService {
 
-	private World						world;
-	private ItemService					itemService;
-	private LegionService				legionService;
-	private TeleportService				teleportService;
-	private ObjectControllerFactory		controllerFactory;
-	private SkillLearnService			skillLearnService;
-	private GroupService				groupService;
-	private PunishmentService			punishmentService;
-	private DuelService					duelService;
-	private PlayerStatsData				playerStatsData;
-	private PlayerInitialData			playerInitialData;
-	private InstanceService				instanceService;
+    private static final Logger log = Logger.getLogger(PlayerService.class);
+    private CacheMap<Integer, Player> playerCache = CacheMapFactory.createSoftCacheMap("Player", "player");
+    private World world;
+    private ItemService itemService;
+    private LegionService legionService;
+    private TeleportService teleportService;
+    private ObjectControllerFactory controllerFactory;
+    private SkillLearnService skillLearnService;
+    private GroupService groupService;
+    private PunishmentService punishmentService;
+    private DuelService duelService;
+    private PlayerStatsData playerStatsData;
+    private PlayerInitialData playerInitialData;
+    private InstanceService instanceService;
 
-	@Inject
-	public PlayerService(World world, ItemService itemService,
-		LegionService legionService, TeleportService teleportService, ObjectControllerFactory controllerFactory,
-		SkillLearnService skillLearnService, GroupService groupService, PunishmentService punishmentService,
-		DuelService duelService, PlayerStatsData playerStatsData, PlayerInitialData playerInitialData,
-		InstanceService instanceService)
-	{
-		this.world = world;
-		this.itemService = itemService;
-		this.legionService = legionService;
-		this.teleportService = teleportService;
-		this.controllerFactory = controllerFactory;
-		this.skillLearnService = skillLearnService;
-		this.groupService = groupService;
-		this.punishmentService = punishmentService;
-		this.duelService = duelService;
-		this.playerStatsData = playerStatsData;
-		this.playerInitialData = playerInitialData;
-		this.instanceService = instanceService;
-	}
+    @Inject
+    public PlayerService(World world, ItemService itemService,
+            LegionService legionService, TeleportService teleportService, ObjectControllerFactory controllerFactory,
+            SkillLearnService skillLearnService, GroupService groupService, PunishmentService punishmentService,
+            DuelService duelService, PlayerStatsData playerStatsData, PlayerInitialData playerInitialData,
+            InstanceService instanceService) {
+        this.world = world;
+        this.itemService = itemService;
+        this.legionService = legionService;
+        this.teleportService = teleportService;
+        this.controllerFactory = controllerFactory;
+        this.skillLearnService = skillLearnService;
+        this.groupService = groupService;
+        this.punishmentService = punishmentService;
+        this.duelService = duelService;
+        this.playerStatsData = playerStatsData;
+        this.playerInitialData = playerInitialData;
+        this.instanceService = instanceService;
+    }
 
-	/**
-	 * Checks if name is already taken or not
-	 * 
-	 * @param name
-	 *            character name
-	 * @return true if is free, false in other case
-	 */
-	public boolean isFreeName(String name)
-	{
-		return !DAOManager.getDAO(PlayerDAO.class).isNameUsed(name);
-	}
+    /**
+     * Checks if name is already taken or not
+     *
+     * @param name character name
+     * @return true if is free, false in other case
+     */
+    public boolean isFreeName(String name) {
+        return !DAOManager.getDAO(PlayerDAO.class).isNameUsed(name);
+    }
 
-	/**
-	 * Checks if a name is valid. It should contain only english letters
-	 * 
-	 * @param name
-	 *            character name
-	 * @return true if name is valid, false overwise
-	 */
-	public boolean isValidName(String name)
-	{
-		return GSConfig.CHAR_NAME_PATTERN.matcher(name).matches();
-	}
+    /**
+     * Checks if a name is valid. It should contain only english letters
+     *
+     * @param name character name
+     * @return true if name is valid, false overwise
+     */
+    public boolean isValidName(String name) {
+        return GSConfig.CHAR_NAME_PATTERN.matcher(name).matches();
+    }
 
-	/**
-	 * Stores newly created player
-	 * 
-	 * @param player
-	 *            player to store
-	 * @return true if character was successful saved.
-	 */
-	public boolean storeNewPlayer(Player player, String accountName, int accountId)
-	{
-		return DAOManager.getDAO(PlayerDAO.class).saveNewPlayer(player.getCommonData(), accountId, accountName)
-			&& DAOManager.getDAO(PlayerAppearanceDAO.class).store(player)
-			&& DAOManager.getDAO(PlayerSkillListDAO.class).storeSkills(player)
-			&& DAOManager.getDAO(InventoryDAO.class).store(player)
-			&& DAOManager.getDAO(PlayerTitleListDAO.class).storeTitles(player);
-	}
+    /**
+     * Stores newly created player
+     *
+     * @param player player to store
+     * @return true if character was successful saved.
+     */
+    public boolean storeNewPlayer(Player player, String accountName, int accountId) {
+        return DAOManager.getDAO(PlayerDAO.class).saveNewPlayer(player.getCommonData(), accountId, accountName)
+                && DAOManager.getDAO(PlayerAppearanceDAO.class).store(player)
+                && DAOManager.getDAO(PlayerSkillListDAO.class).storeSkills(player)
+                && DAOManager.getDAO(InventoryDAO.class).store(player)
+                && DAOManager.getDAO(PlayerTitleListDAO.class).storeTitles(player);
+    }
 
-	/**
-	 * Stores player data into db
-	 * 
-	 * @param player
-	 */
-	public void storePlayer(Player player)
-	{
-		DAOManager.getDAO(PlayerDAO.class).storePlayer(player);
-		DAOManager.getDAO(PlayerSkillListDAO.class).storeSkills(player);
-		DAOManager.getDAO(PlayerSettingsDAO.class).saveSettings(player);
-		DAOManager.getDAO(PlayerQuestListDAO.class).store(player);
-		DAOManager.getDAO(PlayerTitleListDAO.class).storeTitles(player);
-		DAOManager.getDAO(AbyssRankDAO.class).storeAbyssRank(player);
-		DAOManager.getDAO(PlayerPunishmentsDAO.class).storePlayerPunishments(player);
-		DAOManager.getDAO(InventoryDAO.class).store(player);
-		DAOManager.getDAO(ItemStoneListDAO.class).save(player);
-		DAOManager.getDAO(MailDAO.class).storeMailbox(player);
-	}
+    /**
+     * Stores player data into db
+     *
+     * @param player
+     */
+    public void storePlayer(Player player) {
+        DAOManager.getDAO(PlayerDAO.class).storePlayer(player);
+        DAOManager.getDAO(PlayerSkillListDAO.class).storeSkills(player);
+        DAOManager.getDAO(PlayerSettingsDAO.class).saveSettings(player);
+        DAOManager.getDAO(PlayerQuestListDAO.class).store(player);
+        DAOManager.getDAO(PlayerTitleListDAO.class).storeTitles(player);
+        DAOManager.getDAO(AbyssRankDAO.class).storeAbyssRank(player);
+        DAOManager.getDAO(PlayerPunishmentsDAO.class).storePlayerPunishments(player);
+        DAOManager.getDAO(InventoryDAO.class).store(player);
+        DAOManager.getDAO(ItemStoneListDAO.class).save(player);
+        DAOManager.getDAO(MailDAO.class).storeMailbox(player);
+    }
 
-	/**
-	 * Returns the player with given objId (if such player exists)
-	 * 
-	 * @param playerObjId
-	 * @param account 
-	 * @return Player
-	 */
-	public Player getPlayer(int playerObjId, Account account)
-	{
-		Player player = playerCache.get(playerObjId);
-		if(player != null)
-			return player;
-		
-		/**
-		 * Player common data and appearance should be already loaded in account
-		 */
-		
-		PlayerAccountData playerAccountData = account.getPlayerAccountData(playerObjId);
-		PlayerCommonData pcd = playerAccountData.getPlayerCommonData();
-		PlayerAppearance appearance = playerAccountData.getAppereance();
+    /**
+     * Returns the player with given objId (if such player exists)
+     *
+     * @param playerObjId
+     * @param account
+     * @return Player
+     */
+    public Player getPlayer(int playerObjId, Account account) {
+        Player player = playerCache.get(playerObjId);
+        if (player != null) {
+            return player;
+        }
+        /**
+         * Player common data and appearance should be already loaded in account
+         */
+        PlayerAccountData playerAccountData = account.getPlayerAccountData(playerObjId);
+        PlayerCommonData pcd = playerAccountData.getPlayerCommonData();
+        PlayerAppearance appearance = playerAccountData.getAppereance();
+        player = new Player(controllerFactory.playerController(), pcd, appearance);
+        LegionMember legionMember = legionService.getLegionMember(player.getObjectId());
+        if (legionMember != null) {
+            player.setLegionMember(legionMember);
+        }
+        if (groupService.isGroupMember(playerObjId)) {
+            groupService.setGroup(player);
+        }
 
-		player = new Player(controllerFactory.playerController(), pcd, appearance);		
-		
-		LegionMember legionMember = legionService.getLegionMember(player.getObjectId());
-		if(legionMember != null)
-			player.setLegionMember(legionMember);
+        MacroList macroses = DAOManager.getDAO(PlayerMacrossesDAO.class).restoreMacrosses(playerObjId);
+        player.setMacroList(macroses);
 
-		if(groupService.isGroupMember(playerObjId))
-			groupService.setGroup(player);
-		
-		MacroList macroses = DAOManager.getDAO(PlayerMacrossesDAO.class).restoreMacrosses(playerObjId);
-		player.setMacroList(macroses);
+        player.setSkillList(DAOManager.getDAO(PlayerSkillListDAO.class).loadSkillList(playerObjId));
+        player.setKnownlist(new KnownList(player));
+        player.setFriendList(DAOManager.getDAO(FriendListDAO.class).load(player, world, playerInitialData));
+        player.setBlockList(DAOManager.getDAO(BlockListDAO.class).load(player, world, playerInitialData));
+        player.setTitleList(DAOManager.getDAO(PlayerTitleListDAO.class).loadTitleList(playerObjId));
 
-		player.setSkillList(DAOManager.getDAO(PlayerSkillListDAO.class).loadSkillList(playerObjId));
-		player.setKnownlist(new KnownList(player));
-		player.setFriendList(DAOManager.getDAO(FriendListDAO.class).load(player, world, playerInitialData));
-		player.setBlockList(DAOManager.getDAO(BlockListDAO.class).load(player, world, playerInitialData));
-		player.setTitleList(DAOManager.getDAO(PlayerTitleListDAO.class).loadTitleList(playerObjId));
+        DAOManager.getDAO(PlayerSettingsDAO.class).loadSettings(player);
+        DAOManager.getDAO(AbyssRankDAO.class).loadAbyssRank(player);
 
-		DAOManager.getDAO(PlayerSettingsDAO.class).loadSettings(player);
-		DAOManager.getDAO(AbyssRankDAO.class).loadAbyssRank(player);
+        player.setPlayerStatsTemplate(playerStatsData.getTemplate(player));
 
-		player.setPlayerStatsTemplate(playerStatsData.getTemplate(player));
+        player.setGameStats(new PlayerGameStats(playerStatsData, player));
+        player.setLifeStats(new PlayerLifeStats(player, player.getPlayerStatsTemplate().getMaxHp(), player
+                .getPlayerStatsTemplate().getMaxMp()));
+        player.setEffectController(new PlayerEffectController(player));
+        player.setFlyController(new FlyController(player));
 
-		player.setGameStats(new PlayerGameStats(playerStatsData, player));
-		player.setLifeStats(new PlayerLifeStats(player, player.getPlayerStatsTemplate().getMaxHp(), player
-			.getPlayerStatsTemplate().getMaxMp()));
-		player.setEffectController(new PlayerEffectController(player));
-		player.setFlyController(new FlyController(player));
-		
-		player.setQuestStateList(DAOManager.getDAO(PlayerQuestListDAO.class).load(player));
-		player.setRecipeList(DAOManager.getDAO(PlayerRecipesDAO.class).load(player.getObjectId()));
+        player.setQuestStateList(DAOManager.getDAO(PlayerQuestListDAO.class).load(player));
+        player.setRecipeList(DAOManager.getDAO(PlayerRecipesDAO.class).load(player.getObjectId()));
 
-		/**
-		 * Equipment should be already loaded in account
-		 */
-		Equipment equipment = playerAccountData.getEquipment();
-		equipment.setOwner(player);
-		player.setEquipment(equipment);
-		
-		/**
-		 * Account warehouse should be already loaded in account
-		 */
-		Storage accWarehouse = account.getAccountWarehouse();
-		player.setStorage(accWarehouse, StorageType.ACCOUNT_WAREHOUSE);
-		
-		/**
-		 * Check CUBE storage in account and if missing - load
-		 */
-		Storage inventory = playerAccountData.getInventory();
-		if(inventory == null)
-		{
-			inventory = DAOManager.getDAO(InventoryDAO.class).loadStorage(player, StorageType.CUBE);
-			itemService.loadItemStones(inventory.getStorageItems());
-		}
-		player.setStorage(inventory, StorageType.CUBE);
-		
-		/**
-		 * Check WAREHOUSE storage in account and if missing - load
-		 */
-		Storage warehouse = playerAccountData.getWarehouse();
-		if(warehouse == null)
-		{
-			warehouse = DAOManager.getDAO(InventoryDAO.class).loadStorage(player, StorageType.REGULAR_WAREHOUSE);
-			itemService.loadItemStones(warehouse.getStorageItems());
-		}
-		player.setStorage(warehouse, StorageType.REGULAR_WAREHOUSE);
-		
-		/**
-		 * Apply equipment stats (items and manastones were loaded in account) 
-		 */
-		player.getEquipment().onLoadApplyEquipmentStats();
-		
-		DAOManager.getDAO(PlayerPunishmentsDAO.class).loadPlayerPunishments(player);
+        /**
+         * Equipment should be already loaded in account
+         */
+        Equipment equipment = playerAccountData.getEquipment();
+        equipment.setOwner(player);
+        player.setEquipment(equipment);
 
-		itemService.restoreKinah(player);
+        /**
+         * Account warehouse should be already loaded in account
+         */
+        Storage accWarehouse = account.getAccountWarehouse();
+        player.setStorage(accWarehouse, StorageType.ACCOUNT_WAREHOUSE);
 
-		// update passive stats after effect controller, stats and equipment are initialized
-		player.getController().updatePassiveStats();
+        /**
+         * Check CUBE storage in account and if missing - load
+         */
+        Storage inventory = playerAccountData.getInventory();
+        if (inventory == null) {
+            inventory = DAOManager.getDAO(InventoryDAO.class).loadStorage(player, StorageType.CUBE);
+            itemService.loadItemStones(inventory.getStorageItems());
+        }
+        player.setStorage(inventory, StorageType.CUBE);
 
-		if(player.getCommonData().getTitleId() > 0)
-		{
-			TitleChangeListener.onTitleChange(player.getGameStats(), player.getCommonData().getTitleId(), true);
-		}
-		
-		//analyze current instance
-		instanceService.onPlayerLogin(player);
-		
-		if(CacheConfig.CACHE_PLAYERS)
-			playerCache.put(playerObjId, player);
+        /**
+         * Check WAREHOUSE storage in account and if missing - load
+         */
+        Storage warehouse = playerAccountData.getWarehouse();
+        if (warehouse == null) {
+            warehouse = DAOManager.getDAO(InventoryDAO.class).loadStorage(player, StorageType.REGULAR_WAREHOUSE);
+            itemService.loadItemStones(warehouse.getStorageItems());
+        }
+        player.setStorage(warehouse, StorageType.REGULAR_WAREHOUSE);
 
-		return player;
-	}
+        /**
+         * Apply equipment stats (items and manastones were loaded in account)
+         */
+        player.getEquipment().onLoadApplyEquipmentStats();
 
-	/**
-	 * This method is used for creating new players
-	 * 
-	 * @param playerCommonData
-	 * @param playerAppearance
-	 * @return Player
-	 */
-	public Player newPlayer(PlayerCommonData playerCommonData, PlayerAppearance playerAppearance)
-	{
-		LocationData ld = playerInitialData.getSpawnLocation(playerCommonData.getRace());
+        DAOManager.getDAO(PlayerPunishmentsDAO.class).loadPlayerPunishments(player);
 
-		WorldPosition position = world.createPosition(ld.getMapId(), ld.getX(), ld.getY(), ld.getZ(), ld.getHeading());
-		playerCommonData.setPosition(position);
+        itemService.restoreKinah(player);
 
-		Player newPlayer = new Player(controllerFactory.playerController(), playerCommonData, playerAppearance);
+        // update passive stats after effect controller, stats and equipment are initialized
+        player.getController().updatePassiveStats();
 
-		// Starting skills
-		skillLearnService.addNewSkills(newPlayer, true);
+        if (player.getCommonData().getTitleId() > 0) {
+            TitleChangeListener.onTitleChange(player.getGameStats(), player.getCommonData().getTitleId(), true);
+        }
 
-		// Starting items
-		PlayerCreationData playerCreationData = playerInitialData.getPlayerCreationData(playerCommonData
-			.getPlayerClass());
+        //analyze current instance
+        instanceService.onPlayerLogin(player);
 
-		List<ItemType> items = playerCreationData.getItems();
+        if (CacheConfig.CACHE_PLAYERS) {
+            playerCache.put(playerObjId, player);
+        }
 
-		Storage playerInventory = new Storage(newPlayer, StorageType.CUBE);
-		Storage regularWarehouse = new Storage(newPlayer, StorageType.REGULAR_WAREHOUSE);
-		Storage accountWarehouse = new Storage(newPlayer, StorageType.ACCOUNT_WAREHOUSE);
-		
-		Equipment equipment = new Equipment(newPlayer);
-		newPlayer.setStorage(playerInventory, StorageType.CUBE);
-		newPlayer.setStorage(regularWarehouse, StorageType.REGULAR_WAREHOUSE);
-		newPlayer.setStorage(accountWarehouse, StorageType.ACCOUNT_WAREHOUSE);
-		newPlayer.setEquipment(equipment);
-		newPlayer.setMailbox(new Mailbox());
+        return player;
+    }
 
-		for(ItemType itemType : items)
-		{
-			int itemId = itemType.getTemplate().getTemplateId();
-			Item item = itemService.newItem(itemId, itemType.getCount());
-			if(item == null)
-				continue;
+    /**
+     * This method is used for creating new players
+     *
+     * @param playerCommonData
+     * @param playerAppearance
+     * @return Player
+     */
+    public Player newPlayer(PlayerCommonData playerCommonData, PlayerAppearance playerAppearance) {
+        LocationData ld = playerInitialData.getSpawnLocation(playerCommonData.getRace());
 
-			// When creating new player - all equipment that has slot values will be equipped
-			// Make sure you will not put into xml file more items than possible to equip.
-			ItemTemplate itemTemplate = item.getItemTemplate();
+        WorldPosition position = world.createPosition(ld.getMapId(), ld.getX(), ld.getY(), ld.getZ(), ld.getHeading());
+        playerCommonData.setPosition(position);
 
-			if(itemTemplate.isArmor() || itemTemplate.isWeapon())
-			{
-				item.setEquipped(true);
-				List<ItemSlot> itemSlots = ItemSlot.getSlotsFor(itemTemplate.getItemSlot());
-				item.setEquipmentSlot(itemSlots.get(0).getSlotIdMask());
-				equipment.onLoadHandler(item);
-			}
-			else
-				playerInventory.onLoadHandler(item);
-		}
-		equipment.onLoadApplyEquipmentStats();
-		/**
-		 * Mark inventory and equipment as UPDATE_REQUIRED to be saved during 
-		 * character creation
-		 */
-		playerInventory.setPersistentState(PersistentState.UPDATE_REQUIRED);
-		equipment.setPersistentState(PersistentState.UPDATE_REQUIRED);
-		return newPlayer;
-	}
+        Player newPlayer = new Player(controllerFactory.playerController(), playerCommonData, playerAppearance);
 
-	/**
-	 * This method is called just after player logged in to the game.<br>
-	 * <br>
-	 * <b><font color='red'>NOTICE: </font> This method called only from {@link CM_ENTER_WORLD} and must not be called
-	 * from anywhere else.</b>
-	 * 
-	 * @param player
-	 */
-	public void playerLoggedIn(Player player)
-	{
-		log.info("Player logged in: " + player.getName() + " Account: " + player.getClientConnection().getAccount().getName());
-		player.getCommonData().setOnline(true);
-		DAOManager.getDAO(PlayerDAO.class).onlinePlayer(player, true);
-		player.onLoggedIn();
-	}
+        // Starting skills
+        skillLearnService.addNewSkills(newPlayer, true);
 
-	/**
-	 * This method is called when player leaves the game, which includes just two cases: either player goes back to char
-	 * selection screen or it's leaving the game [closing client].<br>
-	 * <br>
-	 * 
-	 * <b><font color='red'>NOTICE: </font> This method is called only from {@link AionConnection} and {@link CM_QUIT}
-	 * and must not be called from anywhere else</b>
-	 * 
-	 * @param player
-	 */
-	public void playerLoggedOut(final Player player)
-	{
-		log.info("Player logged out: " + player.getName());
-		
-		if(player.getClientConnection() == null)
-		{
-			log.warn("CHECKPOINT: Player already logged out " + player.getName());
-			return;
-		}
-		
-		player.onLoggedOut();
-		
-		player.getEffectController().removeAllEffects();
-		player.getLifeStats().cancelAllTasks();
-		
-		if(player.getLifeStats().isAlreadyDead())
-			teleportService.moveToBindLocation(player, false);
+        // Starting items
+        PlayerCreationData playerCreationData = playerInitialData.getPlayerCreationData(playerCommonData
+                .getPlayerClass());
 
-		if(duelService.isDueling(player.getObjectId()))
-			duelService.loseDuel(player);
-		
-		//temp
-		if(player.getSummon() != null)
-			player.getSummon().getController().release(UnsummonType.LOGOUT);
+        List<ItemType> items = playerCreationData.getItems();
 
-		punishmentService.stopPrisonTask(player, true);
+        Storage playerInventory = new Storage(newPlayer, StorageType.CUBE);
+        Storage regularWarehouse = new Storage(newPlayer, StorageType.REGULAR_WAREHOUSE);
+        Storage accountWarehouse = new Storage(newPlayer, StorageType.ACCOUNT_WAREHOUSE);
 
-		player.getCommonData().setOnline(false);
-		player.getCommonData().setLastOnline(new Timestamp(System.currentTimeMillis()));
+        Equipment equipment = new Equipment(newPlayer);
+        newPlayer.setStorage(playerInventory, StorageType.CUBE);
+        newPlayer.setStorage(regularWarehouse, StorageType.REGULAR_WAREHOUSE);
+        newPlayer.setStorage(accountWarehouse, StorageType.ACCOUNT_WAREHOUSE);
+        newPlayer.setEquipment(equipment);
+        newPlayer.setMailbox(new Mailbox());
 
-		/**
-		 * Store regular warehouse and cube storages in account data
-		 */
-		PlayerAccountData playerAccountData = player.getClientConnection().getAccount().getPlayerAccountData(player.getObjectId());
-		playerAccountData.setWarehouse(player.getWarehouse());
-		playerAccountData.setInventory(player.getInventory());
-		
-		player.setClientConnection(null);
+        for (ItemType itemType : items) {
+            int itemId = itemType.getTemplate().getTemplateId();
+            Item item = itemService.newItem(itemId, itemType.getCount());
+            if (item == null) {
+                continue;
+            }
 
-		if(player.isLegionMember())
-			legionService.onLogout(player);
+            // When creating new player - all equipment that has slot values will be equipped
+            // Make sure you will not put into xml file more items than possible to equip.
+            ItemTemplate itemTemplate = item.getItemTemplate();
 
-		if(player.isInGroup())
-			groupService.scheduleRemove(player);
+            if (itemTemplate.isArmor() || itemTemplate.isWeapon()) {
+                item.setEquipped(true);
+                List<ItemSlot> itemSlots = ItemSlot.getSlotsFor(itemTemplate.getItemSlot());
+                item.setEquipmentSlot(itemSlots.get(0).getSlotIdMask());
+                equipment.onLoadHandler(item);
+            } else {
+                playerInventory.onLoadHandler(item);
+            }
+        }
+        equipment.onLoadApplyEquipmentStats();
+        /**
+         * Mark inventory and equipment as UPDATE_REQUIRED to be saved during
+         * character creation
+         */
+        playerInventory.setPersistentState(PersistentState.UPDATE_REQUIRED);
+        equipment.setPersistentState(PersistentState.UPDATE_REQUIRED);
+        return newPlayer;
+    }
 
-		player.getController().delete();
-		DAOManager.getDAO(PlayerDAO.class).onlinePlayer(player, false);
+    /**
+     * This method is called just after player logged in to the game.<br>
+     * <br>
+     * <b><font color='red'>NOTICE: </font> This method called only from
+     * {@link CM_ENTER_WORLD} and must not be called from anywhere else.</b>
+     *
+     * @param player
+     */
+    public void playerLoggedIn(Player player) {
+        log.info("Player logged in: " + player.getName() + " Account: " + player.getClientConnection().getAccount().getName());
+        player.getCommonData().setOnline(true);
+        DAOManager.getDAO(PlayerDAO.class).onlinePlayer(player, true);
+        player.onLoggedIn();
+    }
 
-		storePlayer(player);
-	}
+    /**
+     * This method is called when player leaves the game, which includes just
+     * two cases: either player goes back to char selection screen or it's
+     * leaving the game [closing client].<br>
+     * <br>
+     *
+     * <b><font color='red'>NOTICE: </font> This method is called only from
+     * {@link AionConnection} and {@link CM_QUIT} and must not be called from
+     * anywhere else</b>
+     *
+     * @param player
+     */
+    public void playerLoggedOut(final Player player) {
+        log.info("Player logged out: " + player.getName());
 
-	public void playerLoggedOutDelay(final Player player, int delay)
-	{
-		// force stop movement of player
-		player.getController().stopMoving();
+        if (player.getClientConnection() == null) {
+            log.warn("CHECKPOINT: Player already logged out " + player.getName());
+            return;
+        }
 
-		ThreadPoolManager.getInstance().scheduleTaskManager(new Runnable(){
-			@Override
-			public void run()
-			{
-				playerLoggedOut(player);
-			}
-		}, delay);
-	}
+        player.onLoggedOut();
 
-	/**
-	 * Cancel Player deletion process if its possible.
-	 * 
-	 * @param accData
-	 *            PlayerAccountData
-	 * 
-	 * @return True if deletion was successful canceled.
-	 */
-	public boolean cancelPlayerDeletion(PlayerAccountData accData)
-	{
-		if(accData.getDeletionDate() == null)
-			return true;
+        player.getEffectController().removeAllEffects();
+        player.getLifeStats().cancelAllTasks();
 
-		if(accData.getDeletionDate().getTime() > System.currentTimeMillis())
-		{
-			accData.setDeletionDate(null);
-			storeDeletionTime(accData);
-			return true;
-		}
-		return false;
-	}
+        if (player.getLifeStats().isAlreadyDead()) {
+            teleportService.moveToBindLocation(player, false);
+        }
 
-	/**
-	 * Starts player deletion process if its possible. If deletion is possible character should be deleted after 5
-	 * minutes.
-	 * 
-	 * @param accData
-	 *            PlayerAccountData
-	 */
-	public void deletePlayer(PlayerAccountData accData)
-	{
-		if(accData.getDeletionDate() != null)
-			return;
+        if (duelService.isDueling(player.getObjectId())) {
+            duelService.loseDuel(player);
+        }
 
-		accData.setDeletionDate(new Timestamp(System.currentTimeMillis() + 5 * 60 * 1000));
-		storeDeletionTime(accData);
-	}
+        //temp
+        if (player.getSummon() != null) {
+            player.getSummon().getController().release(UnsummonType.LOGOUT);
+        }
 
-	/**
-	 * Completely removes player from database
-	 * 
-	 * @param playerId
-	 *            id of player to delete from db
-	 */
-	void deletePlayerFromDB(int playerId)
-	{
-		DAOManager.getDAO(PlayerDAO.class).deletePlayer(playerId);
-		DAOManager.getDAO(InventoryDAO.class).deletePlayerItems(playerId);
-	}
+        punishmentService.stopPrisonTask(player, true);
 
-	/**
-	 * Updates deletion time in database
-	 * 
-	 * @param accData
-	 *            PlayerAccountData
-	 */
-	private void storeDeletionTime(PlayerAccountData accData)
-	{
-		DAOManager.getDAO(PlayerDAO.class).updateDeletionTime(accData.getPlayerCommonData().getPlayerObjId(),
-			accData.getDeletionDate());
-	}
+        player.getCommonData().setOnline(false);
+        player.getCommonData().setLastOnline(new Timestamp(System.currentTimeMillis()));
 
-	/**
-	 * 
-	 * @param objectId
-	 * @param creationDate
-	 */
-	public void storeCreationTime(int objectId, Timestamp creationDate)
-	{
-		DAOManager.getDAO(PlayerDAO.class).storeCreationTime(objectId, creationDate);
-	}
+        /**
+         * Store regular warehouse and cube storages in account data
+         */
+        PlayerAccountData playerAccountData = player.getClientConnection().getAccount().getPlayerAccountData(player.getObjectId());
+        playerAccountData.setWarehouse(player.getWarehouse());
+        playerAccountData.setInventory(player.getInventory());
 
-	/**
-	 * Add macro for player
-	 * 
-	 * @param player
-	 *            Player
-	 * @param macroOrder
-	 *            Macro order
-	 * @param macroXML
-	 *            Macro XML
-	 */
-	public void addMacro(Player player, int macroOrder, String macroXML)
-	{
-		if(player.getMacroList().addMacro(macroOrder, macroXML))
-		{
-			DAOManager.getDAO(PlayerMacrossesDAO.class).addMacro(player.getObjectId(), macroOrder, macroXML);
-		}
-	}
+        player.setClientConnection(null);
 
-	/**
-	 * Remove macro with specified index from specified player
-	 * 
-	 * @param player
-	 *            Player
-	 * @param macroOrder
-	 *            Macro order index
-	 */
-	public void removeMacro(Player player, int macroOrder)
-	{
-		if(player.getMacroList().removeMacro(macroOrder))
-		{
-			DAOManager.getDAO(PlayerMacrossesDAO.class).deleteMacro(player.getObjectId(), macroOrder);
-		}
-	}
+        if (player.isLegionMember()) {
+            legionService.onLogout(player);
+        }
 
-	/**
-	 * Gets a player ONLY if he is in the cache
-	 * 
-	 * @return Player or null if not cached
-	 */
-	public Player getCachedPlayer(int playerObjectId)
-	{
-		return playerCache.get(playerObjectId);
-	}
+        if (player.isInGroup()) {
+            groupService.scheduleRemove(player);
+        }
 
-	/**
-	 * @return the playerStatsData
-	 */
-	public PlayerStatsData getPlayerStatsData()
-	{
-		return playerStatsData;
-	}
+        player.getController().delete();
+        DAOManager.getDAO(PlayerDAO.class).onlinePlayer(player, false);
 
-	/**
-	 * @return the playerInitialData
-	 */
-	public PlayerInitialData getPlayerInitialData()
-	{
-		return playerInitialData;
-	}
+        storePlayer(player);
+    }
+
+    public void playerLoggedOutDelay(final Player player, int delay) {
+        // force stop movement of player
+        player.getController().stopMoving();
+
+        ThreadPoolManager.getInstance().scheduleTaskManager(new Runnable() {
+            @Override
+            public void run() {
+                playerLoggedOut(player);
+            }
+        }, delay);
+    }
+
+    /**
+     * Cancel Player deletion process if its possible.
+     *
+     * @param accData PlayerAccountData
+     *
+     * @return True if deletion was successful canceled.
+     */
+    public boolean cancelPlayerDeletion(PlayerAccountData accData) {
+        if (accData.getDeletionDate() == null) {
+            return true;
+        }
+
+        if (accData.getDeletionDate().getTime() > System.currentTimeMillis()) {
+            accData.setDeletionDate(null);
+            storeDeletionTime(accData);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Starts player deletion process if its possible. If deletion is possible
+     * character should be deleted after 5 minutes.
+     *
+     * @param accData PlayerAccountData
+     */
+    public void deletePlayer(PlayerAccountData accData) {
+        if (accData.getDeletionDate() != null) {
+            return;
+        }
+
+        accData.setDeletionDate(new Timestamp(System.currentTimeMillis() + 5 * 60 * 1000));
+        storeDeletionTime(accData);
+    }
+
+    /**
+     * Completely removes player from database
+     *
+     * @param playerId id of player to delete from db
+     */
+    void deletePlayerFromDB(int playerId) {
+        DAOManager.getDAO(PlayerDAO.class).deletePlayer(playerId);
+        DAOManager.getDAO(InventoryDAO.class).deletePlayerItems(playerId);
+    }
+
+    /**
+     * Updates deletion time in database
+     *
+     * @param accData PlayerAccountData
+     */
+    private void storeDeletionTime(PlayerAccountData accData) {
+        DAOManager.getDAO(PlayerDAO.class).updateDeletionTime(accData.getPlayerCommonData().getPlayerObjId(),
+                accData.getDeletionDate());
+    }
+
+    /**
+     *
+     * @param objectId
+     * @param creationDate
+     */
+    public void storeCreationTime(int objectId, Timestamp creationDate) {
+        DAOManager.getDAO(PlayerDAO.class).storeCreationTime(objectId, creationDate);
+    }
+
+    /**
+     * Add macro for player
+     *
+     * @param player Player
+     * @param macroOrder Macro order
+     * @param macroXML Macro XML
+     */
+    public void addMacro(Player player, int macroOrder, String macroXML) {
+        if (player.getMacroList().addMacro(macroOrder, macroXML)) {
+            DAOManager.getDAO(PlayerMacrossesDAO.class).addMacro(player.getObjectId(), macroOrder, macroXML);
+        }
+    }
+
+    /**
+     * Remove macro with specified index from specified player
+     *
+     * @param player Player
+     * @param macroOrder Macro order index
+     */
+    public void removeMacro(Player player, int macroOrder) {
+        if (player.getMacroList().removeMacro(macroOrder)) {
+            DAOManager.getDAO(PlayerMacrossesDAO.class).deleteMacro(player.getObjectId(), macroOrder);
+        }
+    }
+
+    /**
+     * Gets a player ONLY if he is in the cache
+     *
+     * @return Player or null if not cached
+     */
+    public Player getCachedPlayer(int playerObjectId) {
+        return playerCache.get(playerObjectId);
+    }
+
+    /**
+     * @return the playerStatsData
+     */
+    public PlayerStatsData getPlayerStatsData() {
+        return playerStatsData;
+    }
+
+    /**
+     * @return the playerInitialData
+     */
+    public PlayerInitialData getPlayerInitialData() {
+        return playerInitialData;
+    }
 }

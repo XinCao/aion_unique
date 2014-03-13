@@ -26,66 +26,64 @@ import com.aionemu.gameserver.model.gameobjects.player.Player;
  * @author Mr. Poke
  *
  */
-public class StaticObjectKnownList extends KnownList
-{
+public class StaticObjectKnownList extends KnownList {
 
-	/**
-	 * @param owner
-	 */
-	public StaticObjectKnownList(VisibleObject owner)
-	{
-		super(owner);
-	}
+    /**
+     * @param owner
+     */
+    public StaticObjectKnownList(VisibleObject owner) {
+        super(owner);
+    }
 
-	/**
-	 * Add VisibleObject to this KnownList.
-	 * 
-	 * @param object
-	 */
-	@Override
-	protected void add(VisibleObject object)
-	{
-		if (object instanceof Player)
-			super.add(object);
-	}
+    /**
+     * Add VisibleObject to this KnownList.
+     *
+     * @param object
+     */
+    @Override
+    protected void add(VisibleObject object) {
+        if (object instanceof Player) {
+            super.add(object);
+        }
+    }
 
-	/**
-	 * Find objects that are in visibility range.
-	 */
-	@Override
-	protected void findVisibleObjects()
-	{
-		if(owner == null || !owner.isSpawned())
-			return;
-		
-		Iterator<MapRegion> neighboursIt = owner.getActiveRegion().getNeighboursIterator();
+    /**
+     * Find objects that are in visibility range.
+     */
+    @Override
+    protected void findVisibleObjects() {
+        if (owner == null || !owner.isSpawned()) {
+            return;
+        }
 
-		while(neighboursIt.hasNext())
-		{
-			MapRegion r = neighboursIt.next();
-			Collection<VisibleObject> objects = r.getObjects();
+        Iterator<MapRegion> neighboursIt = owner.getActiveRegion().getNeighboursIterator();
 
-			for(VisibleObject newObject : objects)
-			{
+        while (neighboursIt.hasNext()) {
+            MapRegion r = neighboursIt.next();
+            Collection<VisibleObject> objects = r.getObjects();
 
-				if(newObject == owner || newObject == null)
-					continue;
+            for (VisibleObject newObject : objects) {
 
-				if (!(newObject instanceof Player))
-					continue;
+                if (newObject == owner || newObject == null) {
+                    continue;
+                }
 
-				if(!checkObjectInRange(owner, newObject))
-					continue;
+                if (!(newObject instanceof Player)) {
+                    continue;
+                }
 
-				/**
-				 * New object is not known.
-				 */
-				if(knownObjects.put(newObject.getObjectId(), newObject) == null)
-				{
-					newObject.getKnownList().add(owner);
-					owner.getController().see(newObject);
-				}
-			}
-		}
-	}
+                if (!checkObjectInRange(owner, newObject)) {
+                    continue;
+                }
+
+                /**
+                 * New object is not known.
+                 */
+                if (knownObjects.put(newObject.getObjectId(), newObject) == null) {
+                    newObject.getKnownList().add(owner);
+                    owner.getController().see(newObject);
+                }
+            }
+        }
+    }
 }

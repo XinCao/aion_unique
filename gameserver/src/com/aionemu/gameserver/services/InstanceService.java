@@ -39,231 +39,207 @@ import com.google.inject.Inject;
 
 /**
  * @author ATracer
- * 
+ *
  */
-public class InstanceService
-{
-	private static Logger	log	= Logger.getLogger(InstanceService.class);
-	@Inject
-	private World			world;
-	@Inject
-	private SpawnEngine		spawnEngine;
-	@Inject
-	private PortalData		portalData;
-	@Inject
-	private WorldMapsData	worldMapsData;
-	@Inject
-	private TeleportService teleportService;
+public class InstanceService {
 
-	/**
-	 * @param worldId
-	 * @param destroyTime
-	 * @return
-	 */
-	public synchronized WorldMapInstance getNextAvailableInstance(int worldId, int destroyTime)
-	{
-		WorldMap map = world.getWorldMap(worldId);
+    private static Logger log = Logger.getLogger(InstanceService.class);
+    @Inject
+    private World world;
+    @Inject
+    private SpawnEngine spawnEngine;
+    @Inject
+    private PortalData portalData;
+    @Inject
+    private WorldMapsData worldMapsData;
+    @Inject
+    private TeleportService teleportService;
 
-		if(!map.isInstanceType())
-			throw new UnsupportedOperationException("Invalid call for next available instance  of " + worldId);
+    /**
+     * @param worldId
+     * @param destroyTime
+     * @return
+     */
+    public synchronized WorldMapInstance getNextAvailableInstance(int worldId, int destroyTime) {
+        WorldMap map = world.getWorldMap(worldId);
 
-		int nextInstanceId = map.getNextInstanceId();
+        if (!map.isInstanceType()) {
+            throw new UnsupportedOperationException("Invalid call for next available instance  of " + worldId);
+        }
 
-		log.info("Creating new instance: " + worldId + " " + nextInstanceId);
+        int nextInstanceId = map.getNextInstanceId();
 
-		WorldMapInstance worldMapInstance = new WorldMapInstance(map, nextInstanceId);
-		map.addInstance(nextInstanceId, worldMapInstance);
-		spawnEngine.spawnInstance(worldId, worldMapInstance.getInstanceId());
-		
-		if(destroyTime == 0)
-			destroyTime = 60 * 30;//TODO take from template
-		
-		setDestroyTime(worldMapInstance, destroyTime);
-		return worldMapInstance;
-	}
+        log.info("Creating new instance: " + worldId + " " + nextInstanceId);
 
-	/**
-	 * Will create new instance if there are not free yet and spawn according to xml data
-	 * 
-	 * @param worldId
-	 * @return WorldMapInstance
-	 */
-	public WorldMapInstance getNextAvailableInstance(int worldId)
-	{
-		return getNextAvailableInstance(worldId, 0);
-	}
+        WorldMapInstance worldMapInstance = new WorldMapInstance(map, nextInstanceId);
+        map.addInstance(nextInstanceId, worldMapInstance);
+        spawnEngine.spawnInstance(worldId, worldMapInstance.getInstanceId());
 
-	/**
-	 * 
-	 * @param sec
-	 */
-	private void setDestroyTime(final WorldMapInstance instance, int sec)
-	{
-		Future<?> destroyTask = instance.getDestroyTask();
-		if(destroyTask != null)
-			destroyTask.cancel(true);
+        if (destroyTime == 0) {
+            destroyTime = 60 * 30;//TODO take from template
+        }
+        setDestroyTime(worldMapInstance, destroyTime);
+        return worldMapInstance;
+    }
 
-		destroyTask = ThreadPoolManager.getInstance().schedule(new Runnable(){
-			@Override
-			public void run()
-			{
-				destroyInstance(instance);
-			}
-		}, sec * 1000);
-		instance.setDestroyTask(destroyTask);
-	}
+    /**
+     * Will create new instance if there are not free yet and spawn according to
+     * xml data
+     *
+     * @param worldId
+     * @return WorldMapInstance
+     */
+    public WorldMapInstance getNextAvailableInstance(int worldId) {
+        return getNextAvailableInstance(worldId, 0);
+    }
 
-	/**
-	 * Instance will be destroyed All players moved to bind location All objects - deleted
-	 */
-	public void destroyInstance(WorldMapInstance instance)
-	{
-		int worldId = instance.getMapId();
-		int instanceId = instance.getInstanceId();
+    /**
+     *
+     * @param sec
+     */
+    private void setDestroyTime(final WorldMapInstance instance, int sec) {
+        Future<?> destroyTask = instance.getDestroyTask();
+        if (destroyTask != null) {
+            destroyTask.cancel(true);
+        }
 
-		WorldMap map = world.getWorldMap(worldId);
-		map.removeWorldMapInstance(instanceId);
+        destroyTask = ThreadPoolManager.getInstance().schedule(new Runnable() {
+            @Override
+            public void run() {
+                destroyInstance(instance);
+            }
+        }, sec * 1000);
+        instance.setDestroyTask(destroyTask);
+    }
 
-		log.info("Destroying instance:" + worldId + " " + instanceId);
+    /**
+     * Instance will be destroyed All players moved to bind location All objects
+     * - deleted
+     */
+    public void destroyInstance(WorldMapInstance instance) {
+        int worldId = instance.getMapId();
+        int instanceId = instance.getInstanceId();
 
-		Iterator<VisibleObject> it = instance.objectIterator();
-		while(it.hasNext())
-		{
-			VisibleObject obj = it.next();
-			if(obj instanceof Player)
-			{			
-				Player player = (Player) obj;
-				PortalTemplate portal = portalData.getInstancePortalTemplate(worldId, player.getCommonData().getRace());
-				moveToEntryPoint((Player) obj, portal, true);
-			}
-			else
-			{
-				obj.getController().delete();
-			}
-				
-		}
-	}
-	
-	/**
-	 * 
-	 * @param instance
-	 * @param player
-	 */
-	public void registerPlayerWithInstance(WorldMapInstance instance, Player player)
-	{
-		instance.register(player.getObjectId());
-	}
-	
-	/**
-	 * 
-	 * @param instance
-	 * @param group
-	 */
-	public void registerGroupWithInstance(WorldMapInstance instance, PlayerGroup group)
-	{
-		instance.register(group.getGroupId());
-	}
-	
-	/**
-	 * 
-	 * @param worldId
-	 * @param objectId
-	 * @return instance or null
-	 */
-	public WorldMapInstance getRegisteredInstance(int worldId, int objectId)
-	{
-		Iterator<WorldMapInstance> iterator = world.getWorldMap(worldId).iterator();
-		while(iterator.hasNext())
-		{
-			WorldMapInstance instance = iterator.next();
-			if(instance.isRegistered(objectId))
-				return instance;
-		}
-		return null;
-	}
+        WorldMap map = world.getWorldMap(worldId);
+        map.removeWorldMapInstance(instanceId);
 
-	/**
-	 * @param player
-	 */
-	public void onPlayerLogin(Player player)
-	{
-		int worldId = player.getWorldId();
-		
-		WorldMapTemplate worldTemplate = worldMapsData.getTemplate(worldId);
-		if(worldTemplate.isInstance())
-		{
-			PortalTemplate portalTemplate = portalData.getInstancePortalTemplate(worldId, player.getCommonData().getRace());
+        log.info("Destroying instance:" + worldId + " " + instanceId);
 
-			int lookupId = player.getObjectId();
-			if(portalTemplate.isGroup() && player.getPlayerGroup() != null)
-			{
-				lookupId = player.getPlayerGroup().getGroupId();
-			}
-			
-			WorldMapInstance registeredInstance = this.getRegisteredInstance(worldId, lookupId);
-			if(registeredInstance != null)
-			{
-				world.setPosition(player, worldId, registeredInstance.getInstanceId(), player.getX(), player.getY(),
-					player.getZ(), player.getHeading());
-				return;
-			}
-			
-			
-			if(portalTemplate == null)
-			{
-				log.error("No portal template found for " + worldId);
-				return;
-			}
-			
-			moveToEntryPoint(player, portalTemplate, false);			
-		}
-	}
-	
-	/**
-	 * 
-	 * @param player
-	 * @param portalTemplates
-	 */
-	private void moveToEntryPoint(Player player, PortalTemplate portalTemplate, boolean useTeleport)
-	{		
-		EntryPoint entryPoint = null;
-		List<EntryPoint> entryPoints = portalTemplate.getEntryPoint();
+        Iterator<VisibleObject> it = instance.objectIterator();
+        while (it.hasNext()) {
+            VisibleObject obj = it.next();
+            if (obj instanceof Player) {
+                Player player = (Player) obj;
+                PortalTemplate portal = portalData.getInstancePortalTemplate(worldId, player.getCommonData().getRace());
+                moveToEntryPoint((Player) obj, portal, true);
+            } else {
+                obj.getController().delete();
+            }
 
-		for(EntryPoint point : entryPoints)
-		{
-			if(point.getRace() == null || point.getRace().equals(player.getCommonData().getRace()))
-			{
-				entryPoint = point;
-				break;
-			}
-		}
-		
-		if(entryPoint == null)
-		{
-			log.warn("Entry point not found for " + player.getCommonData().getRace() + " " + player.getWorldId());
-			return;
-		}
-		
-		if(useTeleport)
-		{
-			teleportService.teleportTo(player, entryPoint.getMapId(), 1,  entryPoint.getX(), entryPoint.getY(),
-				entryPoint.getZ(), 0);
-		}
-		else
-		{
-			world.setPosition(player, entryPoint.getMapId(), 1, entryPoint.getX(), entryPoint.getY(),
-				entryPoint.getZ(), player.getHeading());
-		}	
-		
-	}
+        }
+    }
 
-	/**
-	 * @param worldId
-	 * @param instanceId
-	 * @return
-	 */
-	public boolean isInstanceExist(int worldId, int instanceId)
-	{
-		return world.getWorldMap(worldId).getWorldMapInstanceById(instanceId) != null;
-	}
+    /**
+     *
+     * @param instance
+     * @param player
+     */
+    public void registerPlayerWithInstance(WorldMapInstance instance, Player player) {
+        instance.register(player.getObjectId());
+    }
+
+    /**
+     *
+     * @param instance
+     * @param group
+     */
+    public void registerGroupWithInstance(WorldMapInstance instance, PlayerGroup group) {
+        instance.register(group.getGroupId());
+    }
+
+    /**
+     *
+     * @param worldId
+     * @param objectId
+     * @return instance or null
+     */
+    public WorldMapInstance getRegisteredInstance(int worldId, int objectId) {
+        Iterator<WorldMapInstance> iterator = world.getWorldMap(worldId).iterator();
+        while (iterator.hasNext()) {
+            WorldMapInstance instance = iterator.next();
+            if (instance.isRegistered(objectId)) {
+                return instance;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param player
+     */
+    public void onPlayerLogin(Player player) {
+        int worldId = player.getWorldId();
+
+        WorldMapTemplate worldTemplate = worldMapsData.getTemplate(worldId);
+        if (worldTemplate.isInstance()) {
+            PortalTemplate portalTemplate = portalData.getInstancePortalTemplate(worldId, player.getCommonData().getRace());
+
+            int lookupId = player.getObjectId();
+            if (portalTemplate.isGroup() && player.getPlayerGroup() != null) {
+                lookupId = player.getPlayerGroup().getGroupId();
+            }
+
+            WorldMapInstance registeredInstance = this.getRegisteredInstance(worldId, lookupId);
+            if (registeredInstance != null) {
+                world.setPosition(player, worldId, registeredInstance.getInstanceId(), player.getX(), player.getY(), player.getZ(), player.getHeading());
+                return;
+            }
+            if (portalTemplate == null) {
+                log.error("No portal template found for " + worldId);
+                return;
+            }
+
+            moveToEntryPoint(player, portalTemplate, false);
+        }
+    }
+
+    /**
+     *
+     * @param player
+     * @param portalTemplates
+     */
+    private void moveToEntryPoint(Player player, PortalTemplate portalTemplate, boolean useTeleport) {
+        EntryPoint entryPoint = null;
+        List<EntryPoint> entryPoints = portalTemplate.getEntryPoint();
+
+        for (EntryPoint point : entryPoints) {
+            if (point.getRace() == null || point.getRace().equals(player.getCommonData().getRace())) {
+                entryPoint = point;
+                break;
+            }
+        }
+
+        if (entryPoint == null) {
+            log.warn("Entry point not found for " + player.getCommonData().getRace() + " " + player.getWorldId());
+            return;
+        }
+
+        if (useTeleport) {
+            teleportService.teleportTo(player, entryPoint.getMapId(), 1, entryPoint.getX(), entryPoint.getY(),
+                    entryPoint.getZ(), 0);
+        } else {
+            world.setPosition(player, entryPoint.getMapId(), 1, entryPoint.getX(), entryPoint.getY(),
+                    entryPoint.getZ(), player.getHeading());
+        }
+
+    }
+
+    /**
+     * @param worldId
+     * @param instanceId
+     * @return
+     */
+    public boolean isInstanceExist(int worldId, int instanceId) {
+        return world.getWorldMap(worldId).getWorldMapInstanceById(instanceId) != null;
+    }
 }

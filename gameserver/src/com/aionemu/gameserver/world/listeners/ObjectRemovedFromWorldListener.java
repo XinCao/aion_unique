@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aion-emu.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.aionemu.gameserver.world.listeners;
 
 import com.aionemu.commons.callbacks.Callback;
@@ -23,46 +22,42 @@ import com.aionemu.gameserver.model.gameobjects.VisibleObject;
 
 /**
  * Listener that is invoked after object was removed from the world
- * 
+ *
  * @author SoulKeeper
  */
 @SuppressWarnings("unchecked")
-public abstract class ObjectRemovedFromWorldListener implements Callback
-{
+public abstract class ObjectRemovedFromWorldListener implements Callback {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final CallbackResult beforeCall(Object o, Object[] objects)
-	{
-		return CallbackResult.newContinue();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult beforeCall(Object o, Object[] objects) {
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final CallbackResult afterCall(Object o, Object[] objects, Object o1)
-	{
-		objectRemoved((VisibleObject) objects[0]);
-		return CallbackResult.newContinue();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final CallbackResult afterCall(Object o, Object[] objects, Object o1) {
+        objectRemoved((VisibleObject) objects[0]);
+        return CallbackResult.newContinue();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final Class getBaseClass()
-	{
-		return ObjectRemovedFromWorldListener.class;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class getBaseClass() {
+        return ObjectRemovedFromWorldListener.class;
+    }
 
-	/**
-	 * Actual method that is invoked after object has been removed from the world
-	 * 
-	 * @param object
-	 *            Object that was removed from the world
-	 */
-	protected abstract void objectRemoved(VisibleObject object);
+    /**
+     * Actual method that is invoked after object has been removed from the
+     * world
+     *
+     * @param object Object that was removed from the world
+     */
+    protected abstract void objectRemoved(VisibleObject object);
 }

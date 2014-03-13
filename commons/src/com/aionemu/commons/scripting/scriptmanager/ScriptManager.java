@@ -81,7 +81,7 @@ public class ScriptManager {
      */
     public synchronized void load(File scriptDescriptor) throws Exception {
         JAXBContext c = JAXBContext.newInstance(ScriptInfo.class, ScriptList.class);
-        Unmarshaller u = c.createUnmarshaller();
+        Unmarshaller u = c.createUnmarshaller(); // 创建一个可以用来将 XML 数据转换为 java 内容树的 Unmarshaller 对象
         ScriptList list = (ScriptList) u.unmarshal(scriptDescriptor);
         for (ScriptInfo si : list.getScriptInfos()) {
             ScriptContext context = createContext(si, null);
@@ -105,22 +105,18 @@ public class ScriptManager {
         ScriptContext context = ScriptContextFactory.getScriptContext(si.getRoot(), parent);
         context.setLibraries(si.getLibraries());
         context.setCompilerClassName(si.getCompilerClass());
-
         if (parent == null && contexts.contains(context)) {
             log.warn("Double root script context definition: " + si.getRoot().getAbsolutePath());
             return null;
         }
-
         if (si.getScriptInfos() != null && !si.getScriptInfos().isEmpty()) {
             for (ScriptInfo child : si.getScriptInfos()) {
                 createContext(child, context);
             }
         }
-
         if (parent == null && globalClassListener != null) {
             context.setClassListener(globalClassListener);
         }
-
         return context;
     }
 
@@ -131,7 +127,6 @@ public class ScriptManager {
         for (ScriptContext context : contexts) {
             context.shutdown();
         }
-
         contexts.clear();
     }
 

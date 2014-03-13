@@ -60,197 +60,192 @@ import com.aionemu.gameserver.world.World;
 import com.google.inject.Inject;
 
 /**
- * In this packets aion client is asking if given char [by oid] may login into game [ie start playing].
- * 
+ * In this packets aion client is asking if given char [by oid] may login into
+ * game [ie start playing].
+ *
  * @author -Nemesiss-, Avol
- * 
+ *
  */
-public class CM_ENTER_WORLD extends AionClientPacket
-{
-	/**
-	 * Object Id of player that is entering world
-	 */
-	private int					objectId;
-	@Inject
-	private World				world;
-	@Inject
-	private PlayerService		playerService;
-	@Inject
-	private LegionService		legionService;
-	@Inject
-	private GroupService		groupService;
-	@Inject
-	private TeleportService		teleportService;
-	@Inject
-	private PunishmentService	punishmentService;
-	@Inject
-	private MailService			mailService;
-	@Inject
-	private StigmaService		stigmaService;;
+public class CM_ENTER_WORLD extends AionClientPacket {
 
-	/**
-	 * Constructs new instance of <tt>CM_ENTER_WORLD </tt> packet
-	 * 
-	 * @param opcode
-	 */
-	public CM_ENTER_WORLD(int opcode)
-	{
-		super(opcode);
-	}
+    /**
+     * Object Id of player that is entering world
+     */
+    private int objectId;
+    @Inject
+    private World world;
+    @Inject
+    private PlayerService playerService;
+    @Inject
+    private LegionService legionService;
+    @Inject
+    private GroupService groupService;
+    @Inject
+    private TeleportService teleportService;
+    @Inject
+    private PunishmentService punishmentService;
+    @Inject
+    private MailService mailService;
+    @Inject
+    private StigmaService stigmaService;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void readImpl()
-	{
-		objectId = readD();
-	}
+    /**
+     * Constructs new instance of <tt>CM_ENTER_WORLD </tt> packet
+     * 
+     * @param opcode
+     */
+    public CM_ENTER_WORLD(int opcode) {
+        super(opcode);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void runImpl()
-	{
-		AionConnection client = getConnection();
-		Account account = client.getAccount();
-		PlayerAccountData playerAccData = client.getAccount().getPlayerAccountData(objectId);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void readImpl() {
+        objectId = readD();
+    }
 
-		if(playerAccData == null)
-		{
-			// Somebody wanted to login on character that is not at his account
-			return;
-		}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void runImpl() {
+        AionConnection client = getConnection();
+        Account account = client.getAccount();
+        PlayerAccountData playerAccData = client.getAccount().getPlayerAccountData(objectId);
 
-		Player player = playerService.getPlayer(objectId, account);
+        if (playerAccData == null) {
+            // Somebody wanted to login on character that is not at his account
+            return;
+        }
 
-		if(player != null && client.setActivePlayer(player))
-		{
-			player.setClientConnection(client);
-			/*
-			 * Store player into World.
-			 */
-			world.storeObject(player);
+        Player player = playerService.getPlayer(objectId, account);
 
-			sendPacket(new SM_SKILL_LIST(player));
-			stigmaService.onPlayerLogin(player);
+        if (player != null && client.setActivePlayer(player)) {
+            player.setClientConnection(client);
+            /*
+             * Store player into World.
+             */
+            world.storeObject(player);
 
-			// sendPacket(new SM_UNK91());
-			// sendPacket(new SM_UNKC7());
-			// sendPacket(new SM_UNKC8());
+            sendPacket(new SM_SKILL_LIST(player));
+            stigmaService.onPlayerLogin(player);
 
-			client.sendPacket(new SM_QUEST_LIST(player));
+            // sendPacket(new SM_UNK91());
+            // sendPacket(new SM_UNKC7());
+            // sendPacket(new SM_UNKC8());
 
-			client.sendPacket(new SM_RECIPE_LIST(player.getRecipeList().getRecipeList()));
+            client.sendPacket(new SM_QUEST_LIST(player));
 
-			/*
-			 * Needed
-			 */
-			client.sendPacket(new SM_ENTER_WORLD_CHECK());
+            client.sendPacket(new SM_RECIPE_LIST(player.getRecipeList().getRecipeList()));
 
-			byte[] uiSettings = player.getPlayerSettings().getUiSettings();
-			byte[] shortcuts = player.getPlayerSettings().getShortcuts();
+            /*
+             * Needed
+             */
+            client.sendPacket(new SM_ENTER_WORLD_CHECK());
 
-			if(uiSettings != null)
-				client.sendPacket(new SM_UI_SETTINGS(uiSettings, 0));
+            byte[] uiSettings = player.getPlayerSettings().getUiSettings();
+            byte[] shortcuts = player.getPlayerSettings().getShortcuts();
 
-			if(shortcuts != null)
-				client.sendPacket(new SM_UI_SETTINGS(shortcuts, 1));
+            if (uiSettings != null) {
+                client.sendPacket(new SM_UI_SETTINGS(uiSettings, 0));
+            }
 
-			// sendPacket(new SM_UNK60());
-			// sendPacket(new SM_UNK17());
-			sendPacket(new SM_UNK5E());
+            if (shortcuts != null) {
+                client.sendPacket(new SM_UI_SETTINGS(shortcuts, 1));
+            }
 
-			// Cubesize limit set in inventory.
-			int cubeSize = player.getCubeSize();
-			player.getInventory().setLimit(27 + cubeSize * 9);
+            // sendPacket(new SM_UNK60());
+            // sendPacket(new SM_UNK17());
+            sendPacket(new SM_UNK5E());
 
-			// TODO no need to load items here - inventory will be populated at startup
-			// will be removed next time
+            // Cubesize limit set in inventory.
+            int cubeSize = player.getCubeSize();
+            player.getInventory().setLimit(27 + cubeSize * 9);
 
-			// items
-			Storage inventory = player.getInventory();
-			List<Item> equipedItems = player.getEquipment().getEquippedItems();
-			if(equipedItems.size() != 0)
-			{
-				client.sendPacket(new SM_INVENTORY_INFO(player.getEquipment().getEquippedItems(), cubeSize));
-			}
+            // TODO no need to load items here - inventory will be populated at startup
+            // will be removed next time
 
-			List<Item> unequipedItems = inventory.getAllItems();
-			int itemsSize = unequipedItems.size();
+            // items
+            Storage inventory = player.getInventory();
+            List<Item> equipedItems = player.getEquipment().getEquippedItems();
+            if (equipedItems.size() != 0) {
+                client.sendPacket(new SM_INVENTORY_INFO(player.getEquipment().getEquippedItems(), cubeSize));
+            }
 
-			if(itemsSize != 0)
-			{
-				int index = 0;
-				while(index + 10 < itemsSize)
-				{
-					client.sendPacket(new SM_INVENTORY_INFO(unequipedItems.subList(index, index + 10), cubeSize));
-					index += 10;
-				}
-				client.sendPacket(new SM_INVENTORY_INFO(unequipedItems.subList(index, itemsSize), cubeSize));
-			}
+            List<Item> unequipedItems = inventory.getAllItems();
+            int itemsSize = unequipedItems.size();
 
-			client.sendPacket(new SM_INVENTORY_INFO());
+            if (itemsSize != 0) {
+                int index = 0;
+                while (index + 10 < itemsSize) {
+                    client.sendPacket(new SM_INVENTORY_INFO(unequipedItems.subList(index, index + 10), cubeSize));
+                    index += 10;
+                }
+                client.sendPacket(new SM_INVENTORY_INFO(unequipedItems.subList(index, itemsSize), cubeSize));
+            }
 
-			playerService.playerLoggedIn(player);
+            client.sendPacket(new SM_INVENTORY_INFO());
 
-			// sendPacket(new SM_UNKD3());
+            playerService.playerLoggedIn(player);
 
-			/*
-			 * Needed
-			 */
-			
-			client.sendPacket(new SM_STATS_INFO(player));
-			sendPacket(new SM_CUBE_UPDATE(player, 6));
+            // sendPacket(new SM_UNKD3());
 
-			teleportService.sendSetBindPoint(player);
-			
-			// sendPacket(new SM_UNKE1());
-			sendPacket(new SM_MACRO_LIST(player));
+            /*
+             * Needed
+             */
 
-			sendPacket(new SM_GAME_TIME());
-			player.getController().updateNearbyQuests();
+            client.sendPacket(new SM_STATS_INFO(player));
+            sendPacket(new SM_CUBE_UPDATE(player, 6));
 
-			sendPacket(new SM_TITLE_LIST(player));
-			
-			client.sendPacket(new SM_CHANNEL_INFO(player.getPosition()));
-			/*
-			 * Needed
-			 */
-			sendPacket(new SM_PLAYER_SPAWN(player));
-			sendPacket(new SM_EMOTION_LIST());
-			sendPacket(new SM_INFLUENCE_RATIO());
-			sendPacket(new SM_PRICES());
-			sendPacket(new SM_PLAYER_ID(player));
-			sendPacket(new SM_ABYSS_RANK(player.getAbyssRank()));
+            teleportService.sendSetBindPoint(player);
 
-			sendPacket(new SM_MESSAGE(0, null, "Welcome to " + GSConfig.SERVER_NAME
-				+ " server\nPowered by aion-unique software\ndeveloped by www.aion-unique.org team.\nCopyright 2010",
-				ChatType.ANNOUNCEMENTS));
+            // sendPacket(new SM_UNKE1());
+            sendPacket(new SM_MACRO_LIST(player));
 
-			if(player.isInPrison())
-				punishmentService.updatePrisonStatus(player);
+            sendPacket(new SM_GAME_TIME());
+            player.getController().updateNearbyQuests();
 
-			if(player.isLegionMember())
-				legionService.onLogin(player);
+            sendPacket(new SM_TITLE_LIST(player));
 
-			if(player.isInGroup())
-				groupService.onLogin(player);
+            client.sendPacket(new SM_CHANNEL_INFO(player.getPosition()));
+            /*
+             * Needed
+             */
+            sendPacket(new SM_PLAYER_SPAWN(player));
+            sendPacket(new SM_EMOTION_LIST());
+            sendPacket(new SM_INFLUENCE_RATIO());
+            sendPacket(new SM_PRICES());
+            sendPacket(new SM_PLAYER_ID(player));
+            sendPacket(new SM_ABYSS_RANK(player.getAbyssRank()));
 
-			player.setRates(Rates.getRatesFor(client.getAccount().getMembership()));
+            sendPacket(new SM_MESSAGE(0, null, "Welcome to " + GSConfig.SERVER_NAME
+                    + " server\nPowered by aion-unique software\ndeveloped by www.aion-unique.org team.\nCopyright 2010",
+                    ChatType.ANNOUNCEMENTS));
 
-			ClassChangeService.showClassChangeDialog(player);
-			
-			/**
-			 * Notify mail service to load all mails
-			 */
-			mailService.onPlayerLogin(player);
-		}
-		else
-		{
-			// TODO this is an client error - inform client.
-		}
-	}
+            if (player.isInPrison()) {
+                punishmentService.updatePrisonStatus(player);
+            }
 
+            if (player.isLegionMember()) {
+                legionService.onLogin(player);
+            }
+
+            if (player.isInGroup()) {
+                groupService.onLogin(player);
+            }
+
+            player.setRates(Rates.getRatesFor(client.getAccount().getMembership()));
+
+            ClassChangeService.showClassChangeDialog(player);
+
+            /**
+             * Notify mail service to load all mails
+             */
+            mailService.onPlayerLogin(player);
+        } else {
+            // TODO this is an client error - inform client.
+        }
+    }
 }

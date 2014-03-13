@@ -27,43 +27,37 @@ import com.aionemu.gameserver.network.aion.AionConnection;
 import com.aionemu.gameserver.network.aion.AionServerPacket;
 import com.aionemu.gameserver.utils.PacketSendUtility;
 import com.aionemu.gameserver.world.World;
-/**
- * 
- * @author alexa026 , orz
- * 
- */
-public class SM_TELEPORT_MAP extends AionServerPacket
-{
-	private int	targetObjectId;
-	private Player	player;
-	private TeleporterTemplate teleport;
-	public Npc npc;
-	
-	private static final Logger	log	= Logger.getLogger(SM_TELEPORT_MAP.class);
 
-	
-	public SM_TELEPORT_MAP(Player player, int targetObjectId, TeleporterTemplate teleport)
-	{
-		this.player = player;
-		this.targetObjectId = targetObjectId;
-		
-		World world = player.getActiveRegion().getWorld();
-		this.npc = (Npc)world.findAionObject(targetObjectId);
-		this.teleport = teleport;
-	}
-	
-	@Override
-	protected void writeImpl(AionConnection con, ByteBuffer buf)
-	{
-		if ((teleport != null) && (teleport.getNpcId() != 0) && (teleport.getTeleportId() != 0))
-		{
-			writeD(buf, targetObjectId);
-			writeH(buf, teleport.getTeleportId());
-		}
-		else
-		{
-			PacketSendUtility.sendMessage(player, "Missing info at npc_teleporter.xml with npcid: "+ npc.getNpcId());
-			log.info(String.format("Missing teleport info with npcid: %d", npc.getNpcId()));
-		}
-	}
+/**
+ *
+ * @author alexa026 , orz
+ *
+ */
+public class SM_TELEPORT_MAP extends AionServerPacket {
+
+    private int targetObjectId;
+    private Player player;
+    private TeleporterTemplate teleport;
+    public Npc npc;
+    private static final Logger log = Logger.getLogger(SM_TELEPORT_MAP.class);
+
+    public SM_TELEPORT_MAP(Player player, int targetObjectId, TeleporterTemplate teleport) {
+        this.player = player;
+        this.targetObjectId = targetObjectId;
+
+        World world = player.getActiveRegion().getWorld();
+        this.npc = (Npc) world.findAionObject(targetObjectId);
+        this.teleport = teleport;
+    }
+
+    @Override
+    protected void writeImpl(AionConnection con, ByteBuffer buf) {
+        if ((teleport != null) && (teleport.getNpcId() != 0) && (teleport.getTeleportId() != 0)) {
+            writeD(buf, targetObjectId);
+            writeH(buf, teleport.getTeleportId());
+        } else {
+            PacketSendUtility.sendMessage(player, "Missing info at npc_teleporter.xml with npcid: " + npc.getNpcId());
+            log.info(String.format("Missing teleport info with npcid: %d", npc.getNpcId()));
+        }
+    }
 }

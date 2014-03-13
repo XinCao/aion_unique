@@ -36,56 +36,50 @@ import com.aionemu.gameserver.utils.PacketSendUtility;
  * @author ATracer
  *
  */
-public class StigmaService
-{
-	private static final Logger	log			= Logger.getLogger(StigmaService.class);
-	/**
-	 * @param resultItem
-	 */
-	public void notifyEquipAction(Player player, Item resultItem)
-	{
-		if(resultItem.getItemTemplate().isStigma())
-		{
-			Stigma stigmaInfo = resultItem.getItemTemplate().getStigma();
-			
-			if(stigmaInfo == null)
-			{
-				log.warn("Stigma info missing for item: " + resultItem.getItemTemplate().getTemplateId());
-				return;
-			}
-			
-			int skillId = stigmaInfo.getSkillid();
-			SkillListEntry skill = new SkillListEntry(skillId, stigmaInfo.getSkilllvl(), PersistentState.NOACTION);
-			player.getSkillList().addSkill(skill);
-			PacketSendUtility.sendPacket(player, new SM_SKILL_LIST(skill, 1300401));
-		}
-	}
-	
-	/**
-	 * @param resultItem
-	 */
-	public void notifyUnequipAction(Player player, Item resultItem)
-	{
-		if(resultItem.getItemTemplate().isStigma())
-		{
-			Stigma stigmaInfo = resultItem.getItemTemplate().getStigma();
-			int skillId = stigmaInfo.getSkillid();
-			int nameId = DataManager.SKILL_DATA.getSkillTemplate(skillId).getNameId();
-			PacketSendUtility.sendPacket(player, new SM_SYSTEM_MESSAGE(1300403, new DescriptionId(nameId)));
-			PacketSendUtility.sendPacket(player, new SM_SKILL_ACTIVATION(skillId));
-		}
-	}
-	
-	/**
-	 * 
-	 * @param player
-	 */
-	public void onPlayerLogin(Player player)
-	{
-		List<Item> equippedItems = player.getEquipment().getEquippedItems();
-		for(Item item : equippedItems)
-		{
-			notifyEquipAction(player, item);
-		}
-	}
+public class StigmaService {
+
+    private static final Logger log = Logger.getLogger(StigmaService.class);
+
+    /**
+     * @param resultItem
+     */
+    public void notifyEquipAction(Player player, Item resultItem) {
+        if (resultItem.getItemTemplate().isStigma()) {
+            Stigma stigmaInfo = resultItem.getItemTemplate().getStigma();
+
+            if (stigmaInfo == null) {
+                log.warn("Stigma info missing for item: " + resultItem.getItemTemplate().getTemplateId());
+                return;
+            }
+
+            int skillId = stigmaInfo.getSkillid();
+            SkillListEntry skill = new SkillListEntry(skillId, stigmaInfo.getSkilllvl(), PersistentState.NOACTION);
+            player.getSkillList().addSkill(skill);
+            PacketSendUtility.sendPacket(player, new SM_SKILL_LIST(skill, 1300401));
+        }
+    }
+
+    /**
+     * @param resultItem
+     */
+    public void notifyUnequipAction(Player player, Item resultItem) {
+        if (resultItem.getItemTemplate().isStigma()) {
+            Stigma stigmaInfo = resultItem.getItemTemplate().getStigma();
+            int skillId = stigmaInfo.getSkillid();
+            int nameId = DataManager.SKILL_DATA.getSkillTemplate(skillId).getNameId();
+            PacketSendUtility.sendPacket(player, new SM_SYSTEM_MESSAGE(1300403, new DescriptionId(nameId)));
+            PacketSendUtility.sendPacket(player, new SM_SKILL_ACTIVATION(skillId));
+        }
+    }
+
+    /**
+     *
+     * @param player
+     */
+    public void onPlayerLogin(Player player) {
+        List<Item> equippedItems = player.getEquipment().getEquippedItems();
+        for (Item item : equippedItems) {
+            notifyEquipAction(player, item);
+        }
+    }
 }

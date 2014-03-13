@@ -20,32 +20,31 @@ import java.nio.ByteBuffer;
 
 import com.aionemu.gameserver.network.aion.AionConnection;
 import com.aionemu.gameserver.network.aion.AionServerPacket;
+
 /**
  * @author Lyahim
  *
  */
-public class SM_SHOW_NPC_ON_MAP extends AionServerPacket
-{
-	private	int npcid, worldid;
-	private	float x,y,z;
-	
-	public SM_SHOW_NPC_ON_MAP(int npcid, int worldid, float x, float y, float z)
-	{
-		this.npcid = npcid;
-		this.worldid = worldid;
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
-	
-	@Override
-	protected void writeImpl(AionConnection con, ByteBuffer buf)
-	{		
-		writeD(buf, this.npcid);
-		writeD(buf, this.worldid);
-		writeD(buf, this.worldid);
-		writeF(buf, this.x);
-		writeF(buf, this.y);
-		writeF(buf, this.z);
-	}
+public class SM_SHOW_NPC_ON_MAP extends AionServerPacket {
+
+    private int npcid, worldid;
+    private float x, y, z;
+
+    public SM_SHOW_NPC_ON_MAP(int npcid, int worldid, float x, float y, float z) {
+        this.npcid = npcid;
+        this.worldid = worldid;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    @Override
+    protected void writeImpl(AionConnection con, ByteBuffer buf) {
+        writeD(buf, this.npcid);
+        writeD(buf, this.worldid);
+        writeD(buf, this.worldid);
+        writeF(buf, this.x);
+        writeF(buf, this.y);
+        writeF(buf, this.z);
+    }
 }

@@ -20,9 +20,9 @@ package com.aionemu.gameserver.world;
  * @author ATracer
  *
  */
-public enum WorldType
-{
-	ASMODAE,
-	ELYSEA,
-	ABYSS
+public enum WorldType {
+
+    ASMODAE,
+    ELYSEA,
+    ABYSS
 }

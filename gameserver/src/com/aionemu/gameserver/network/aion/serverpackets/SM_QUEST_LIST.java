@@ -33,61 +33,53 @@ import com.aionemu.gameserver.questEngine.model.QuestStatus;
  * @author MrPoke
  *
  */
-public class SM_QUEST_LIST extends AionServerPacket
-{
-	
-	private SortedMap<Integer, QuestState> compliteQuestList = new TreeMap<Integer, QuestState>();
-	private List<QuestState> startedQuestList = new ArrayList<QuestState>();
-	private List<Integer> questList = new ArrayList<Integer>();
+public class SM_QUEST_LIST extends AionServerPacket {
 
-	public SM_QUEST_LIST(Player player)
-	{
-		for (QuestState qs : player.getQuestStateList().getAllQuestState())
-		{
-			if (qs.getStatus() == QuestStatus.COMPLITE)
-				compliteQuestList.put(qs.getQuestId(), qs);
-			else if (qs.getStatus() != QuestStatus.NONE)
-				startedQuestList.add(qs);
-		}
+    private SortedMap<Integer, QuestState> compliteQuestList = new TreeMap<Integer, QuestState>();
+    private List<QuestState> startedQuestList = new ArrayList<QuestState>();
+    private List<Integer> questList = new ArrayList<Integer>();
 
-		//temp solution to enable teleports
-		// TODO remove this as this quests are implemented
+    public SM_QUEST_LIST(Player player) {
+        for (QuestState qs : player.getQuestStateList().getAllQuestState()) {
+            if (qs.getStatus() == QuestStatus.COMPLITE) {
+                compliteQuestList.put(qs.getQuestId(), qs);
+            } else if (qs.getStatus() != QuestStatus.NONE) {
+                startedQuestList.add(qs);
+            }
+        }
 
-		if (player.getCommonData().getRace() == Race.ELYOS)
-		{
-			compliteQuestList.put(1130, new QuestState(1130, QuestStatus.COMPLITE, 0, 1));
-			compliteQuestList.put(1300, new QuestState(1300, QuestStatus.COMPLITE, 0, 1));
-		}
-		else
-		{
-			compliteQuestList.put(2200, new QuestState(2200, QuestStatus.COMPLITE, 0, 1));
-			compliteQuestList.put(2300, new QuestState(2300, QuestStatus.COMPLITE, 0, 1));
-		}
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void writeImpl(AionConnection con, ByteBuffer buf)
-	{
-		writeH(buf, compliteQuestList.size() + questList.size());
-		for (QuestState qs : compliteQuestList.values())
-		{
-			writeH(buf, qs.getQuestId());
-			writeC(buf, qs.getCompliteCount());
-		}
-		writeC(buf, startedQuestList.size());
-		for (QuestState qs : startedQuestList) // quest list size ( max is 25 )
-		{
-			writeH(buf, qs.getQuestId());
-			writeH(buf, 0);
-		}
-		for (QuestState qs : startedQuestList)
-		{
-			writeC(buf, qs.getStatus().value());
-			writeD(buf, qs.getQuestVars().getQuestVars());
-			writeC(buf, 0);
-		}
-	}
+        //temp solution to enable teleports
+        // TODO remove this as this quests are implemented
 
+        if (player.getCommonData().getRace() == Race.ELYOS) {
+            compliteQuestList.put(1130, new QuestState(1130, QuestStatus.COMPLITE, 0, 1));
+            compliteQuestList.put(1300, new QuestState(1300, QuestStatus.COMPLITE, 0, 1));
+        } else {
+            compliteQuestList.put(2200, new QuestState(2200, QuestStatus.COMPLITE, 0, 1));
+            compliteQuestList.put(2300, new QuestState(2300, QuestStatus.COMPLITE, 0, 1));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void writeImpl(AionConnection con, ByteBuffer buf) {
+        writeH(buf, compliteQuestList.size() + questList.size());
+        for (QuestState qs : compliteQuestList.values()) {
+            writeH(buf, qs.getQuestId());
+            writeC(buf, qs.getCompliteCount());
+        }
+        writeC(buf, startedQuestList.size());
+        for (QuestState qs : startedQuestList) // quest list size ( max is 25 )
+        {
+            writeH(buf, qs.getQuestId());
+            writeH(buf, 0);
+        }
+        for (QuestState qs : startedQuestList) {
+            writeC(buf, qs.getStatus().value());
+            writeD(buf, qs.getQuestVars().getQuestVars());
+            writeC(buf, 0);
+        }
+    }
 }

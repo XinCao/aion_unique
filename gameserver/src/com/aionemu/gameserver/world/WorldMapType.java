@@ -16,74 +16,64 @@
  */
 package com.aionemu.gameserver.world;
 
-public enum WorldMapType
-{
-	// Asmodea
-	PANDAEMONIUM(120010000),
-	ISHALGEN(220010000),
-	MORHEIM(220020000),
-	ALTGARD(220030000),
-	BELUSLAN(220040000),
-	BRUSTHONIN(220050000),
+public enum WorldMapType {
+    // Asmodea
 
-	// Elysia
-	SANCTUM(110010000),
-	POETA(210010000),
-	VERTERON(210030000),
-	ELTNEN(210020000),
-	HEIRON(210040000),
-	THEOMOBOS(210060000),
-	
-	// Prison
-	PRISON(510010000),
+    PANDAEMONIUM(120010000),
+    ISHALGEN(220010000),
+    MORHEIM(220020000),
+    ALTGARD(220030000),
+    BELUSLAN(220040000),
+    BRUSTHONIN(220050000),
+    // Elysia
+    SANCTUM(110010000),
+    POETA(210010000),
+    VERTERON(210030000),
+    ELTNEN(210020000),
+    HEIRON(210040000),
+    THEOMOBOS(210060000),
+    // Prison
+    PRISON(510010000),
+    RESHANTA(400010000),
+    //Instances
+    NOCHSANA_TRAINING_CAMP(300030000),
+    DARK_POETA(300040000),
+    ASTERIA_CHAMBER(300050000),
+    SULFUR_TREE_NEST(300060000),
+    CHAMBER_OF_ROAH(300070000),
+    LEFT_WING_CHAMBER(300080000),
+    RIGHT_WING_CHAMBER(300090000),
+    STEEL_RAKE(300100000),
+    DREDGION(300110000),
+    KYSIS_CHAMBER(300120000),
+    MIREN_CHAMBER(300130000),
+    KROTAN_CHAMBER(300140000),
+    THEOBOMOS_LAB(310110000),
+    SKY_TEMPLE_INTERIOR(320050000),
+    DRAUPNIR_CAVE(320080000),
+    FIRE_TEMPLE(320100000),
+    ALQUIMIA(320110000),
+    ADMA_STRONGHOLD(320130000);
+    private final int worldId;
 
-	RESHANTA(400010000),
-	
-	//Instances
-	NOCHSANA_TRAINING_CAMP(300030000),
-	DARK_POETA(300040000),
-	ASTERIA_CHAMBER(300050000),
-	SULFUR_TREE_NEST(300060000),
-	CHAMBER_OF_ROAH(300070000),
-	LEFT_WING_CHAMBER(300080000),
-	RIGHT_WING_CHAMBER(300090000),
-	STEEL_RAKE(300100000),
-	DREDGION(300110000),
-	KYSIS_CHAMBER(300120000),
-	MIREN_CHAMBER(300130000),
-	KROTAN_CHAMBER(300140000), 
-	THEOBOMOS_LAB(310110000),
-	SKY_TEMPLE_INTERIOR(320050000),
-	DRAUPNIR_CAVE(320080000),
-	FIRE_TEMPLE(320100000),
-	ALQUIMIA(320110000),
-	ADMA_STRONGHOLD(320130000);
+    WorldMapType(int worldId) {
+        this.worldId = worldId;
+    }
 
-	private final int worldId;
+    public int getId() {
+        return worldId;
+    }
 
-	WorldMapType(int worldId )
-	{
-		this.worldId = worldId;
-	}
-
-	public int getId()
-	{
-		return worldId;
-	}
-	
-	/**
-	 * @param id of world
-	 * @return WorldMapType
-	 */
-	public static WorldMapType getWorld(int id)
-	{
-		for (WorldMapType type : WorldMapType.values())
-		{
-			if (type.getId() == id)
-			{
-				return type;
-			}
-		}
-		return null;
-	}
+    /**
+     * @param id of world
+     * @return WorldMapType
+     */
+    public static WorldMapType getWorld(int id) {
+        for (WorldMapType type : WorldMapType.values()) {
+            if (type.getId() == id) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

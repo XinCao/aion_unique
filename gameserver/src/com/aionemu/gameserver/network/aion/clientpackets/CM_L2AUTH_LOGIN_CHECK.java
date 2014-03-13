@@ -22,69 +22,67 @@ import com.aionemu.gameserver.services.AccountService;
 import com.google.inject.Inject;
 
 /**
- * In this packets aion client is authenticating himself by providing accountId and rest of sessionKey - we will check
- * if its valid at login server side.
- * 
+ * In this packets aion client is authenticating himself by providing accountId
+ * and rest of sessionKey - we will check if its valid at login server side.
+ *
  * @author -Nemesiss-
- * 
+ *
  */
 // TODO: L2AUTH? Really? :O
-public class CM_L2AUTH_LOGIN_CHECK extends AionClientPacket
-{
-	@Inject
-	private LoginServer	loginServer;
-	@SuppressWarnings("unused")
-	@Inject
-	private AccountService accountService;
-	
-	/**
-	 * playOk2 is part of session key - its used for security purposes we will check if this is the key what login
-	 * server sends.
-	 */
-	private int			playOk2;
-	/**
-	 * playOk1 is part of session key - its used for security purposes we will check if this is the key what login
-	 * server sends.
-	 */
-	private int			playOk1;
-	/**
-	 * accountId is part of session key - its used for authentication we will check if this accountId is matching any
-	 * waiting account login server side and check if rest of session key is ok.
-	 */
-	private int			accountId;
-	/**
-	 * loginOk is part of session key - its used for security purposes we will check if this is the key what login
-	 * server sends.
-	 */
-	private int			loginOk;
+public class CM_L2AUTH_LOGIN_CHECK extends AionClientPacket {
 
-	/**
-	 * Constructs new instance of <tt>CM_L2AUTH_LOGIN_CHECK </tt> packet
-	 * @param opcode
-	 */
-	public CM_L2AUTH_LOGIN_CHECK(int opcode)
-	{
-		super(opcode);
-	}
+    @Inject
+    private LoginServer loginServer;
+    @SuppressWarnings("unused")
+    @Inject
+    private AccountService accountService;
+    /**
+     * playOk2 is part of session key - its used for security purposes we will
+     * check if this is the key what login server sends.
+     */
+    private int playOk2;
+    /**
+     * playOk1 is part of session key - its used for security purposes we will
+     * check if this is the key what login server sends.
+     */
+    private int playOk1;
+    /**
+     * accountId is part of session key - its used for authentication we will
+     * check if this accountId is matching any waiting account login server side
+     * and check if rest of session key is ok.
+     */
+    private int accountId;
+    /**
+     * loginOk is part of session key - its used for security purposes we will
+     * check if this is the key what login server sends.
+     */
+    private int loginOk;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void readImpl()
-	{
-		playOk2 = readD();
-		playOk1 = readD();
-		accountId = readD();
-		loginOk = readD();
-	}
+    /**
+     * Constructs new instance of <tt>CM_L2AUTH_LOGIN_CHECK </tt> packet
+     *
+     * @param opcode
+     */
+    public CM_L2AUTH_LOGIN_CHECK(int opcode) {
+        super(opcode);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void runImpl()
-	{
-		loginServer.requestAuthenticationOfClient(accountId, getConnection(), loginOk, playOk1, playOk2);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void readImpl() {
+        playOk2 = readD();
+        playOk1 = readD();
+        accountId = readD();
+        loginOk = readD();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void runImpl() {
+        loginServer.requestAuthenticationOfClient(accountId, getConnection(), loginOk, playOk1, playOk2);
+    }
 }
