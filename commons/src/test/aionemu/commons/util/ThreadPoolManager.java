@@ -32,6 +32,14 @@ public class ThreadPoolManager implements DisconnectionThreadPool {
         gameServerPacketsThreadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 5L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory("Game Server Packet Pool", Thread.NORM_PRIORITY + 3));
     }
 
+    /**
+     * 定时线程执行器（公共）
+     * 
+     * @param <T>
+     * @param r
+     * @param delay
+     * @return 
+     */
     @SuppressWarnings("unchecked")
     public <T extends Runnable> ScheduledFuture<T> schedule(T r, long delay) {
         try {
@@ -45,7 +53,7 @@ public class ThreadPoolManager implements DisconnectionThreadPool {
     }
 
     /**
-     * Schedule at fixed rate
+     * 定时，且以固定频率执行的线程执行器（公共）
      *
      * @param <T>
      * @param r
@@ -69,14 +77,20 @@ public class ThreadPoolManager implements DisconnectionThreadPool {
     }
 
     /**
-     * Executes Runnable - GameServer Client packet.
-     *
-     * @param pkt
+     * 客户端接受包，线程执行器（专有）
+     * 
+     * @param pkt 
      */
     public void executeGsPacket(Runnable pkt) {
-        gameServerPacketsThreadPool.execute(pkt);
+        this.gameServerPacketsThreadPool.execute(pkt);
     }
 
+    /**
+     * 执行断开连接任务（专有）
+     * 
+     * @param dt
+     * @param delay 
+     */
     @Override
     public final void scheduleDisconnection(DisconnectionTask dt, long delay) {
         if (delay < 0) {

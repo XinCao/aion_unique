@@ -19,7 +19,6 @@ public class AionConnection extends AConnection {
     private boolean joinedGs;
     private State state;
     public static enum State {
-
         CONNECTED,
         AUTHED_GG,
         AUTHED_LOGIN
@@ -62,18 +61,8 @@ public class AionConnection extends AConnection {
 
     @Override
     protected final void onDisconnect() {
-        /**
-         * Remove account only if not joined GameServer yet.
-         */
-//        if ((account != null) && !joinedGs) {
-//            AccountController.removeAccountOnLS(account);
-//            AccountTimeController.updateOnLogout(account);
-//        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected final void onServerClose() {
         close(true);
@@ -84,7 +73,6 @@ public class AionConnection extends AConnection {
             if (isWriteDisabled()) {
                 return;
             }
-
             log.debug("sending packet: " + bp);
             sendMsgQueue.addLast(bp);
             enableWriteInterest();
