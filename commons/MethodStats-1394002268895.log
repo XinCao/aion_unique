@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<entries>
-	<!-- This XML contains statistics about execution times. -->
-	<!-- Submitted results will help the developers to optimize the server. -->
-	<entry average="2" count="4" total="10" class="com.aionemu.commons.utils.concurrent.RunnableStatsManager" method="run()" min="1" max="4" />
-</entries>

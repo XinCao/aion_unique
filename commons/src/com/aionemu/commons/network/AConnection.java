@@ -99,7 +99,7 @@ public abstract class AConnection {
         writeBuffer.order(ByteOrder.LITTLE_ENDIAN);
         readBuffer = ByteBuffer.allocate(8192 * 2);
         readBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        dispatcher.register(socketChannel, SelectionKey.OP_READ, this);
+        ((AcceptReadWriteDispatcherImpl)dispatcher).register(socketChannel, SelectionKey.OP_READ, this);
         this.ip = socketChannel.socket().getInetAddress().getHostAddress();
     }
 
@@ -151,7 +151,7 @@ public abstract class AConnection {
             }
 
             isForcedClosing = forced;
-            getDispatcher().closeConnection(this);
+            ((AcceptReadWriteDispatcherImpl)getDispatcher()).closeConnection(this);
         }
     }
 
