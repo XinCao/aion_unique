@@ -1,4 +1,4 @@
-package test.aionemu.commons.network;
+package common.net.imp.network;
 
 import com.aionemu.commons.network.AConnection;
 import com.aionemu.commons.network.Dispatcher;

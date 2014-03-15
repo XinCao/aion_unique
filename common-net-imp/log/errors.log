@@ -1,0 +1,9 @@
+[ERROR 2014-03-15 18:30:41] com.aionemu.commons.network.AcceptDispatcherImpl:39 - Error while accepting connection: +java.lang.NullPointerException
+java.lang.NullPointerException
+	at test.aionemu.commons.ncrypt.KeyGen.getEncryptedRSAKeyPair(KeyGen.java:92)
+	at test.aionemu.commons.network.AionConnection.<init>(AionConnection.java:40)
+	at test.aionemu.commons.network.AionConnectionFactoryImpl.create(AionConnectionFactoryImpl.java:49)
+	at com.aionemu.commons.network.Acceptor.accept(Acceptor.java:28)
+	at com.aionemu.commons.network.AcceptDispatcherImpl.accept(AcceptDispatcherImpl.java:37)
+	at com.aionemu.commons.network.AcceptDispatcherImpl.dispatch(AcceptDispatcherImpl.java:22)
+	at com.aionemu.commons.network.Dispatcher.run(Dispatcher.java:26)
