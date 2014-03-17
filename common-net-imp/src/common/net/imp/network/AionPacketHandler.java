@@ -11,7 +11,7 @@ public class AionPacketHandler {
     public static AionClientPacket handle(ByteBuffer data, AionConnection client) {
         AionClientPacket msg = null;
         State state = client.getState();
-        int id = data.get() & 0xff;
+        int id = data.get() & 0xff; // 去掉高字节部分
         switch (state) {
             case CONNECTED: {
                 switch (id) {

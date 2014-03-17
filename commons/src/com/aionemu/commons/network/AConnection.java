@@ -1,19 +1,3 @@
-/*
- * This file is part of aion-emu <aion-emu.com>.
- *
- *  aion-emu is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  aion-emu is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with aion-emu.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.aionemu.commons.network;
 
 import java.io.IOException;
@@ -21,76 +5,22 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-
 import com.aionemu.commons.options.Assertion;
 
-/**
- * Class that represent Connection with server socket. Connection is created by
- * <code>ConnectionFactory</code> and attached to
- * <code>SelectionKey</code> key. Selection key is registered to one of
- * Dispatchers
- * <code>Selector</code> to handle io read and write.
- *
- * @author -Nemesiss-
- */
 public abstract class AConnection {
 
-    /**
-     * SocketChannel representing this connection
-     */
     private final SocketChannel socketChannel;
-    /**
-     * Dispatcher [AcceptReadWriteDispatcherImpl] to witch this connection
-     * SelectionKey is registered.
-     */
     private final Dispatcher dispatcher;
-    /**
-     * SelectionKey representing this connection.
-     */
     private SelectionKey key;
-    /**
-     * True if this connection should be closed after sending last server
-     * packet.
-     */
     protected boolean pendingClose;
-    /**
-     * True if OnDisconnect() method should be called immediately after this
-     * connection was closed.
-     */
     protected boolean isForcedClosing;
-    /**
-     * True if this connection is already closed.
-     */
     protected boolean closed;
-    /**
-     * Object on witch some methods are synchronized
-     */
     protected final Object guard = new Object();
-    /**
-     * ByteBuffer for io write.
-     */
     public final ByteBuffer writeBuffer;
-    /**
-     * ByteBuffer for io read.
-     */
     public final ByteBuffer readBuffer;
-    /**
-     * Caching ip address to make sure that {@link #getIP()} method works even
-     * after disconnection
-     */
     private final String ip;
-    /**
-     * Used only for PacketProcessor synchronization purpose
-     */
     private boolean locked = false;
 
-    /**
-     * Constructor
-     *
-     * @param sc
-     * @param d
-     * @throws IOException
-     */
     public AConnection(SocketChannel sc, Dispatcher d) throws IOException {
         socketChannel = sc;
         dispatcher = d;
@@ -103,19 +33,10 @@ public abstract class AConnection {
         this.ip = socketChannel.socket().getInetAddress().getHostAddress();
     }
 
-    /**
-     * Set selection key - result of registration this AConnection socketChannel
-     * to one of dispatchers.
-     *
-     * @param key
-     */
-    final void setKey(SelectionKey key) {
+    public final void setKey(SelectionKey key) {
         this.key = key;
     }
 
-    /**
-     * Notify Dispatcher Selector that we want write some data here.
-     */
     protected final void enableWriteInterest() {
         if (key.isValid()) {
             key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
@@ -123,10 +44,7 @@ public abstract class AConnection {
         }
     }
 
-    /**
-     * @return Dispatcher to witch this connection is registered.
-     */
-    final Dispatcher getDispatcher() {
+    private Dispatcher getDispatcher() {
         return dispatcher;
     }
 
@@ -137,12 +55,11 @@ public abstract class AConnection {
         return socketChannel;
     }
 
+
     /**
-     * Connection will be closed at some time [by Dispatcher Thread], after that
-     * onDisconnect() method will be called to clear all other things.
-     *
-     * @param forced is just hint that getDisconnectionDelay() should return 0
-     * so OnDisconnect() method will be called without any delay.
+     * 关闭连接
+     * 
+     * @param forced 
      */
     public final void close(boolean forced) {
         synchronized (guard) {

@@ -1,6 +1,5 @@
 package com.aionemu.commons.network;
 
-import com.aionemu.commons.options.Assertion;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -10,12 +9,11 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.log4j.Logger;
 
 public class AcceptReadWriteDispatcherImpl extends Dispatcher {
     
-    private final DisconnectionThreadPool dcPool; // ThreadPool on witch disconnection tasks will be executed.
-    private final List<AConnection> pendingClose = new ArrayList<AConnection>(); // List of connections that should be closed by this <code>Dispatcher</code> as soon as possible.
+    private final DisconnectionThreadPool dcPool;
+    private final List<AConnection> pendingClose = new ArrayList<AConnection>();
 
     public AcceptReadWriteDispatcherImpl(String name, DisconnectionThreadPool dcPool) throws IOException {
         super(name);
@@ -25,7 +23,7 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
     @Override
     protected void dispatch() throws IOException {
         int selected = selector.select();
-        processPendingClose();
+        this.processPendingClose();
         if (selected != 0) {
             Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
             while (selectedKeys.hasNext()) {
@@ -80,35 +78,15 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
     }
 
     private void closeConnectionImpl(AConnection con) {
-        /**
-         * Test if this build should use assertion. If NetworkAssertion == false
-         * javac will remove this code block
-         */
-        if (Assertion.NetworkAssertion) {
-            assert Thread.currentThread() == this;
-        }
-
         if (con.onlyClose()) {
             dcPool.scheduleDisconnection(new DisconnectionTask(con), con.getDisconnectionDelay());
         }
     }
 
-    /**
-     * Read data from socketChannel represented by SelectionKey key. Parse and
-     * Process data. Prepare buffer for next read.
-     *
-     * @param key
-     */
-    final void read(SelectionKey key) {
+    private void read(SelectionKey key) {
         SocketChannel socketChannel = (SocketChannel) key.channel();
         AConnection con = (AConnection) key.attachment();
-
         ByteBuffer rb = con.readBuffer;
-        // Test if this build should use assertion. If NetworkAssertion == false javac will remove this code block
-        if (Assertion.NetworkAssertion) {
-            assert con.readBuffer.hasRemaining();
-        }
-        // Attempt to read off the channel
         int numRead;
         try {
             numRead = socketChannel.read(rb);
@@ -116,42 +94,26 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
             closeConnectionImpl(con);
             return;
         }
-
         if (numRead == -1) {
-            // Remote entity shut the socket down cleanly. Do the same from our end and cancel the channel.
             closeConnectionImpl(con);
             return;
         } else if (numRead == 0) {
             return;
         }
-
         rb.flip();
-        while (rb.remaining() > 2 && rb.remaining() >= rb.getShort(rb.position())) {
-            // got full message
-            if (!parse(con, rb)) {
+        while (rb.remaining() > 2 && rb.remaining() >= rb.getShort(rb.position())) { // 读取是否为一个整包（也可能大于一个整包（多个包），因此这里会使用循环）
+            if (!parse(con, rb)) { // 判断包是否合法
                 closeConnectionImpl(con);
                 return;
             }
         }
         if (rb.hasRemaining()) {
-            con.readBuffer.compact();
-            // Test if this build should use assertion. If NetworkAssertion == false javac will remove this code block
-            if (Assertion.NetworkAssertion) {
-                assert con.readBuffer.hasRemaining();
-            }
+            con.readBuffer.compact(); // 将缓冲区的当前位置和界限之间的字节复制到缓冲区的开始处（为下一个包准备）
         } else {
             rb.clear();
         }
     }
 
-    /**
-     * Parse data from buffer and prepare buffer for reading just one packet -
-     * call processData(ByteBuffer b).
-     *
-     * @param con Connection
-     * @param buf Buffer with packet data
-     * @return True if packet was parsed.
-     */
     private boolean parse(AConnection con, ByteBuffer buf) {
         short sz = 0;
         try {
@@ -159,32 +121,21 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
             if (sz > 1) {
                 sz -= 2;
             }
-            ByteBuffer b = (ByteBuffer) buf.slice().limit(sz);
-            b.order(ByteOrder.LITTLE_ENDIAN);
-            // read message fully
-            buf.position(buf.position() + sz);
+            ByteBuffer b = (ByteBuffer) buf.slice().limit(sz); // 创建新的缓冲区
+            b.order(ByteOrder.LITTLE_ENDIAN); // 小端模式，高字节存储在高地址
+            buf.position(buf.position() + sz); // 写一个包数据开始处
             return con.processData(b);
         } catch (IllegalArgumentException e) {
-            log.warn("Error on parsing input from client - account: " + con + " packet size: " + sz + " real size:"
-                    + buf.remaining(), e);
+            log.warn("Error on parsing input from client - account: " + con + " packet size: " + sz + " real size:" + buf.remaining(), e);
             return false;
         }
     }
 
-    /**
-     * Write as much as possible data to socketChannel represented by
-     * SelectionKey key. If all data were written key write interest will be
-     * disabled.
-     *
-     * @param key
-     */
-    final void write(SelectionKey key) {
+    private void write(SelectionKey key) {
         SocketChannel socketChannel = (SocketChannel) key.channel();
         AConnection con = (AConnection) key.attachment();
-
         int numWrite;
         ByteBuffer wb = con.writeBuffer;
-        // We have not writted data
         if (wb.hasRemaining()) {
             try {
                 numWrite = socketChannel.write(wb);
@@ -196,8 +147,7 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
                 log.info("Write " + numWrite + " ip: " + con.getIP());
                 return;
             }
-            // Again not all data was send
-            if (wb.hasRemaining()) {
+            if (wb.hasRemaining()) { // 不能被写的数据
                 return;
             }
         }
@@ -208,7 +158,6 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
                 wb.limit(0);
                 break;
             }
-            // Attempt to write to the channel
             try {
                 numWrite = socketChannel.write(wb);
             } catch (IOException e) {
@@ -219,18 +168,11 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
                 log.info("Write " + numWrite + " ip: " + con.getIP());
                 return;
             }
-            // not all data was send
-            if (wb.hasRemaining()) {
+            if (wb.hasRemaining()) { // 不能被写的数据
                 return;
             }
         }
-        // Test if this build should use assertion. If NetworkAssertion == false javac will remove this code block
-        if (Assertion.NetworkAssertion) {
-            assert !wb.hasRemaining();
-        }
-        // We wrote away all data, so we're no longer interested in writing on this socket.
         key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
-        // We wrote all data so we can close connection that is "PandingClose"
         if (con.isPendingClose()) {
             closeConnectionImpl(con);
         }
