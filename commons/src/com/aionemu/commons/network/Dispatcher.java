@@ -3,7 +3,6 @@ package com.aionemu.commons.network;
 import java.io.IOException;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
-
 import org.apache.log4j.Logger;
 
 public abstract class Dispatcher extends Thread {
@@ -21,7 +20,7 @@ public abstract class Dispatcher extends Thread {
 
     @Override
     public void run() {
-        for (;;) {
+        while(true) {
             try {
                 dispatch();
                 synchronized (gate) {

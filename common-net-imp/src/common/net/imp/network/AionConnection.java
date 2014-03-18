@@ -100,20 +100,20 @@ public class AionConnection extends AConnection {
         }
     }
 
-    public final int getSessionId() {
-        return sessionId;
+	public final void setJoinedGs() {
+        joinedGs = true;
     }
-
-    public final State getState() {
-        return state;
-    }
-
+	
     public final void setState(State state) {
         this.state = state;
     }
-
-    public final void setJoinedGs() {
-        joinedGs = true;
+	
+	public final State getState() {
+        return state;
+    }
+	
+    public final int getSessionId() {
+        return sessionId;
     }
 
     @Override

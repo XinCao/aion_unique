@@ -1,9 +1,7 @@
 package com.aionemu.commons.network.packet;
 
 import java.nio.ByteBuffer;
-
 import org.apache.log4j.Logger;
-
 import com.aionemu.commons.network.AConnection;
 
 public abstract class BaseClientPacket<T extends AConnection> extends BasePacket implements Runnable {
@@ -32,7 +30,6 @@ public abstract class BaseClientPacket<T extends AConnection> extends BasePacket
     public final boolean read() {
         try {
             readImpl();
-
             if (getRemainingBytes() > 0) {
                 log.debug("Packet " + this + " not fully readed!");
             }

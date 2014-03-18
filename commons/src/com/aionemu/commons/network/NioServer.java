@@ -6,9 +6,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.log4j.Logger;
-
 import com.aionemu.commons.options.Assertion;
 
 public class NioServer {
@@ -23,13 +21,6 @@ public class NioServer {
     private ServerCfg[] cfgs;
 
     public NioServer(int readWriteThreads, DisconnectionThreadPool dcPool, ServerCfg... cfgs) {
-        if (Assertion.NetworkAssertion) { // Test if this build should use assertion and enforce it. If NetworkAssertion == false javac will remove this code block
-            boolean assertionEnabled = false;
-            assert assertionEnabled = true;
-            if (!assertionEnabled) {
-                throw new RuntimeException("This is unstable build. Assertion must be enabled! Add -ea to your start script or consider using stable build instead.");
-            }
-        }
         this.dcPool = dcPool;
         this.readWriteThreads = readWriteThreads;
         this.cfgs = cfgs;

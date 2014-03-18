@@ -7,9 +7,7 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.log4j.Logger;
-
 import com.aionemu.commons.network.packet.BaseClientPacket;
 
 public class PacketProcessor<T extends AConnection> {
@@ -31,14 +29,11 @@ public class PacketProcessor<T extends AConnection> {
         if (maxThreads < minThreads) {
             maxThreads = minThreads;
         }
-
         this.minThreads = minThreads;
         this.maxThreads = maxThreads;
-
         if (minThreads != maxThreads) {
             startCheckerThread();
         }
-
         for (int i = 0; i < minThreads; i++) {
             newThread();
         }
@@ -52,14 +47,11 @@ public class PacketProcessor<T extends AConnection> {
         if (threads.size() >= maxThreads) {
             return false;
         }
-
         String name = "PacketProcessor:" + threads.size();
         log.debug("Creating new PacketProcessor Thread: " + name);
-
         Thread t = new Thread(new PacketProcessorTask(), name);
         threads.add(t);
         t.start();
-
         return true;
     }
 
@@ -82,7 +74,7 @@ public class PacketProcessor<T extends AConnection> {
     }
 
     private BaseClientPacket<T> getFirstAviable() {
-        for (;;) {
+        while(true) {
             while (packets.isEmpty()) {
                 notEmpty.awaitUninterruptibly();
             }
@@ -104,17 +96,15 @@ public class PacketProcessor<T extends AConnection> {
         @Override
         public void run() {
             BaseClientPacket<T> packet = null;
-            for (;;) {
+            while(true) {
                 lock.lock();
                 try {
                     if (packet != null) {
                         packet.getConnection().unlockConnection();
                     }
-
                     if (Thread.interrupted()) {
                         return;
                     }
-
                     packet = getFirstAviable();
                 } finally {
                     lock.unlock();
