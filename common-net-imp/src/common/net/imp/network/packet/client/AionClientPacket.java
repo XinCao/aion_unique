@@ -1,6 +1,8 @@
-package test.aionemu.commons.network;
+package common.net.imp.network.packet.client;
 
 import com.aionemu.commons.network.packet.BaseClientPacket;
+import common.net.imp.network.core.AionConnection;
+import common.net.imp.network.packet.server.AionServerPacket;
 
 import java.nio.ByteBuffer;
 import org.apache.log4j.Logger;

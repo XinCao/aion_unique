@@ -1,6 +1,10 @@
-package common.net.imp.network;
+package common.net.imp.network.core;
 
-import common.net.imp.network.AionConnection.State;
+import common.net.imp.network.packet.server.AionServerPacket;
+import common.net.imp.network.packet.client.AionClientPacket;
+import common.net.imp.network.packet.client.CLIENT_TEST;
+import common.net.imp.network.packet.server.SERVER_TEST;
+import common.net.imp.network.core.AionConnection.State;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.log4j.Logger;
@@ -13,7 +17,8 @@ public class AionPacketHandler {
     private static final Logger log = Logger.getLogger(AionPacketHandler.class);
 
     public enum AionClientKind {
-        CLIENT_TEST(0x1, CLIENT_TEST.class, State.CONNECTED)
+
+        CLIENT_TEST(0x0001, CLIENT_TEST.class, State.CONNECTED)
         ;
         public static final Map<Integer, AionClientKind> authedLoginAionClientKindMap = new HashMap<Integer, AionClientKind>();
         public static final Map<Integer, AionClientKind> connectedAionClientKindMap = new HashMap<Integer, AionClientKind>();
@@ -116,7 +121,8 @@ public class AionPacketHandler {
     }
 
     public static enum AionServerKind {
-        SERVER_TEST(0x2, SERVER_TEST.class, State.CONNECTED)
+
+        SERVER_TEST(0x0002, SERVER_TEST.class, State.CONNECTED)
         ;
         private int opcode;
         private Class<AionServerPacket> clazz;
@@ -170,6 +176,6 @@ public class AionPacketHandler {
                 log.warn(ex);
             }
         }
-        return msg;
+        return new SERVER_TEST(ask.getOpcode());
     }
 }

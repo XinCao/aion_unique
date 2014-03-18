@@ -1,4 +1,7 @@
 package common.net.imp.network;
+
+import common.net.imp.network.core.IOServer;
+
 /**
  *
  * @author caoxin

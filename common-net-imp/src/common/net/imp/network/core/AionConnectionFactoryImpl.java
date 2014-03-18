@@ -1,4 +1,4 @@
-package test.aionemu.commons.network;
+package common.net.imp.network.core;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;

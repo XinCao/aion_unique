@@ -1,8 +1,11 @@
-package test.aionemu.commons.network;
+package common.net.imp.network.core;
 
+import common.net.imp.network.packet.server.AionServerPacket;
+import common.net.imp.network.packet.client.AionClientPacket;
 import com.aionemu.commons.network.AConnection;
 import com.aionemu.commons.network.Dispatcher;
 import com.aionemu.commons.network.PacketProcessor;
+import common.net.imp.network.core.AionPacketHandler.AionServerKind;
 import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,8 +32,8 @@ public class AionConnection extends AConnection {
         state = State.CONNECTED;
         String ip = getIP();
         log.info("connection from: " + ip);
-//        sendPacket(new SM_INIT(this, blowfishKey));
-        
+        AionServerPacket asp = AionPacketHandler.getServerPacketByASK(AionServerKind.SERVER_TEST, this);
+        sendPacket(asp);
     }
 
     @Override
@@ -100,20 +103,20 @@ public class AionConnection extends AConnection {
         }
     }
 
-    public final int getSessionId() {
-        return sessionId;
+	public final void setJoinedGs() {
+        joinedGs = true;
     }
-
-    public final State getState() {
-        return state;
-    }
-
+	
     public final void setState(State state) {
         this.state = state;
     }
-
-    public final void setJoinedGs() {
-        joinedGs = true;
+	
+	public final State getState() {
+        return state;
+    }
+	
+    public final int getSessionId() {
+        return sessionId;
     }
 
     @Override

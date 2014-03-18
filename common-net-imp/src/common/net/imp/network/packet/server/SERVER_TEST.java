@@ -1,5 +1,6 @@
-package common.net.imp.network;
+package common.net.imp.network.packet.server;
 
+import common.net.imp.network.core.AionConnection;
 import java.nio.ByteBuffer;
 
 /**
@@ -14,6 +15,6 @@ public class SERVER_TEST extends AionServerPacket {
 
     @Override
     protected void writeImpl(AionConnection con, ByteBuffer buf) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.writeS(buf, "hello world!");
     }
 }

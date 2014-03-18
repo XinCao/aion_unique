@@ -1,9 +1,8 @@
-package common.net.imp.network;
+package common.net.imp.network.core;
 
 import com.aionemu.commons.network.NioServer;
 import com.aionemu.commons.network.ServerCfg;
-import test.aionemu.commons.network.AionConnectionFactoryImpl;
-import test.aionemu.commons.util.ThreadPoolManager;
+import common.net.imp.network.util.ThreadPoolManager;
 
 public class IOServer {
 
