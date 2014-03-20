@@ -1,2 +1,0 @@
-[INFO 2014-03-14 15:31:18] com.aionemu.commons.network.NioServer:50 - Server listening on IP: 127.0.0.1 Port 8888 for Aion Connections
-[INFO 2014-03-14 15:31:48] test.aionemu.commons.network.AionConnection:32 - connection from: 127.0.0.1
