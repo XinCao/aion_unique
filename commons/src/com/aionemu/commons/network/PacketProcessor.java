@@ -13,8 +13,8 @@ import com.aionemu.commons.network.packet.BaseClientPacket;
 public class PacketProcessor<T extends AConnection> {
 
     private static final Logger log = Logger.getLogger(PacketProcessor.class.getName());
-    private final static int reduceThreshold = 3;
-    private final static int increaseThreshold = 50;
+    private final static int reduceThreshold = 3; // 最小阈值
+    private final static int increaseThreshold = 50; // 最大阈值
     private final Lock lock = new ReentrantLock();
     private final Condition notEmpty = lock.newCondition();
     private final List<BaseClientPacket<T>> packets = new LinkedList<BaseClientPacket<T>>();
@@ -74,7 +74,7 @@ public class PacketProcessor<T extends AConnection> {
     }
 
     private BaseClientPacket<T> getFirstAviable() {
-        while(true) {
+        while (true) {
             while (packets.isEmpty()) {
                 notEmpty.awaitUninterruptibly();
             }
@@ -96,7 +96,7 @@ public class PacketProcessor<T extends AConnection> {
         @Override
         public void run() {
             BaseClientPacket<T> packet = null;
-            while(true) {
+            while (true) {
                 lock.lock();
                 try {
                     if (packet != null) {
@@ -116,31 +116,33 @@ public class PacketProcessor<T extends AConnection> {
 
     private final class CheckerTask implements Runnable {
 
-        private final int sleepTime = 60 * 1000;
+        private final int sleepTime = 60 * 1000; // 一分钟检测一次，这个值， 直接关系到，线程池中工作线程的个数，和对请求处理的敏捷程度(如果，对于高并发的需求则需要降低，以提高敏捷度)
         private int lastSize = 0;
 
         @Override
         public void run() {
-            try {
-                Thread.sleep(sleepTime);
-            } catch (InterruptedException e) {
-            }
-
-            int sizeNow = packets.size();
-
-            if (sizeNow < lastSize) {
-                if (sizeNow < reduceThreshold) { // 降低阈值
-                    killThread();
+            while (true) {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
                 }
-            } else if (sizeNow > lastSize && sizeNow > increaseThreshold) {
-                if (!newThread() && sizeNow >= increaseThreshold * 3) {
-                    log
-                            .info("Lagg detected! ["
-                            + sizeNow
-                            + " client packets are waiting for execution]. You should consider increasing PacketProcessor maxThreads or hardware upgrade.");
+
+                int sizeNow = packets.size();
+
+                if (sizeNow < lastSize) {
+                    if (sizeNow < reduceThreshold) { // 降低阈值
+                        killThread();
+                    }
+                } else if (sizeNow > lastSize && sizeNow > increaseThreshold) {
+                    if (!newThread() && sizeNow >= increaseThreshold * 3) {
+                        log
+                                .info("Lagg detected! ["
+                                + sizeNow
+                                + " client packets are waiting for execution]. You should consider increasing PacketProcessor maxThreads or hardware upgrade.");
+                    }
                 }
+                lastSize = sizeNow;
             }
-            lastSize = sizeNow;
         }
     }
 }

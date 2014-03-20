@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
  */
 public class SERVER_TEST extends AionServerPacket {
 
-    public SERVER_TEST(int opcode) {
+    public SERVER_TEST(Integer opcode) {
         super(opcode);
     }
 

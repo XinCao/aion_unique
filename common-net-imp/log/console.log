@@ -1,3 +1,0 @@
-[INFO 2014-03-18 19:28:00] com.aionemu.commons.network.NioServer:41 - Server listening on IP: 127.0.0.1 Port 8888 for Aion Connections
-[INFO 2014-03-18 19:28:05] common.net.imp.network.core.AionConnection:34 - connection from: 127.0.0.1
-[WARN 2014-03-18 19:29:00] common.net.imp.network.core.AionPacketHandler:166 - java.lang.NoSuchMethodException: common.net.imp.network.packet.server.SERVER_TEST.<init>()

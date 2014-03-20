@@ -96,8 +96,8 @@ public class AionPacketHandler {
         }
         if (ack != null) {
             try {
-                Class<AionClientPacket> clazz = (Class<AionClientPacket>) ack.getClazz();
-                Constructor<AionClientPacket> constructor = clazz.getConstructor();
+                Class<AionClientPacket> clazz = ack.getClazz();
+                Constructor<AionClientPacket> constructor = clazz.getConstructor(ByteBuffer.class, AionConnection.class, Integer.class);
                 msg = constructor.newInstance(data, client, ack.getOpcode());
             } catch (NoSuchMethodException ex) {
                 log.warn(ex);
@@ -160,7 +160,7 @@ public class AionPacketHandler {
         if (ask.getState() == state) {
             try {
                 Class<AionServerPacket> clazz = ask.getClazz();
-                Constructor<AionServerPacket> constructor = clazz.getConstructor();
+                Constructor<AionServerPacket> constructor = clazz.getConstructor(Integer.class);
                 msg = constructor.newInstance(ask.getOpcode());
             } catch (NoSuchMethodException ex) {
                 log.warn(ex);
@@ -176,6 +176,6 @@ public class AionPacketHandler {
                 log.warn(ex);
             }
         }
-        return new SERVER_TEST(ask.getOpcode());
+        return msg;
     }
 }

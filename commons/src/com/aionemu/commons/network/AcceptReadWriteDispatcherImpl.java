@@ -101,6 +101,7 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
             return;
         }
         rb.flip();
+        rb.mark();
         while (rb.remaining() > 2 && rb.remaining() >= rb.getShort(rb.position())) { // 读取是否为一个整包（也可能大于一个整包（多个包），因此这里会使用循环）
             if (!parse(con, rb)) { // 判断包是否合法
                 closeConnectionImpl(con);
@@ -117,6 +118,7 @@ public class AcceptReadWriteDispatcherImpl extends Dispatcher {
     private boolean parse(AConnection con, ByteBuffer buf) {
         short sz = 0;
         try {
+            buf.reset();
             sz = buf.getShort();
             if (sz > 1) {
                 sz -= 2;
