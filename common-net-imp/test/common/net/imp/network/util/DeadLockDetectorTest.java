@@ -1,5 +1,6 @@
 package common.net.imp.network.util;
 
+import common.net.imp.util.DeadLockDetector;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

@@ -1,5 +1,6 @@
 package common.net.imp.network.util;
 
+import common.net.imp.util.ThreadPoolManager;
 import com.aionemu.commons.network.DisconnectionTask;
 import org.apache.log4j.Logger;
 import org.junit.After;

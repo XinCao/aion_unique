@@ -40,11 +40,11 @@ public class DatabaseConfig {
     /**
      * Config file location
      */
-    public static final String CONFIG_FILE = "config/network/database.properties";
+    public static final String CONFIG_FILE = "./common/dao/config/database.properties";
     /**
      * Default database url.
      */
-    @Property(key = "database.url", defaultValue = "jdbc:mysql://localhost:3306/aion_uni")
+    @Property(key = "database.url", defaultValue = "jdbc:mysql://localhost:3306/au_server_ls")
     public static String DATABASE_URL;
     /**
      * Name of database Driver
@@ -74,7 +74,7 @@ public class DatabaseConfig {
     /**
      * Location of database script context descriptor
      */
-    @Property(key = "database.scriptcontext.descriptor", defaultValue = "./data/scripts/system/database/database.xml")
+    @Property(key = "database.scriptcontext.descriptor", defaultValue = "./common/dao/config/script/database.xml")
     public static File DATABASE_SCRIPTCONTEXT_DESCRIPTOR;
 
     /**

@@ -1,6 +1,6 @@
-package common.net.imp.network.packet.client;
+package common.net.imp.packet.client;
 
-import common.net.imp.network.core.AionConnection;
+import common.net.imp.core.AionConnection;
 import java.nio.ByteBuffer;
 
 /**

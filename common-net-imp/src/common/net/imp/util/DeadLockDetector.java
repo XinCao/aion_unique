@@ -1,4 +1,4 @@
-package common.net.imp.network.util;
+package common.net.imp.util;
 
 import java.lang.management.LockInfo;
 import java.lang.management.ManagementFactory;

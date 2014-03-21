@@ -1,11 +1,11 @@
-package common.net.imp.network.core;
+package common.net.imp.core;
 
-import common.net.imp.network.packet.server.AionServerPacket;
-import common.net.imp.network.packet.client.AionClientPacket;
+import common.net.imp.packet.server.AionServerPacket;
+import common.net.imp.packet.client.AionClientPacket;
 import com.aionemu.commons.network.AConnection;
 import com.aionemu.commons.network.Dispatcher;
 import com.aionemu.commons.network.PacketProcessor;
-import common.net.imp.network.core.AionPacketHandler.AionServerKind;
+import common.net.imp.core.AionPacketHandler.AionServerKind;
 import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.nio.ByteBuffer;

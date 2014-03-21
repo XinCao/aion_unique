@@ -1,10 +1,10 @@
-package common.net.imp.network.core;
+package common.net.imp.core;
 
-import common.net.imp.network.packet.server.AionServerPacket;
-import common.net.imp.network.packet.client.AionClientPacket;
-import common.net.imp.network.packet.client.CLIENT_TEST;
-import common.net.imp.network.packet.server.SERVER_TEST;
-import common.net.imp.network.core.AionConnection.State;
+import common.net.imp.packet.server.AionServerPacket;
+import common.net.imp.packet.client.AionClientPacket;
+import common.net.imp.packet.client.CLIENT_TEST;
+import common.net.imp.packet.server.SERVER_TEST;
+import common.net.imp.core.AionConnection.State;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.log4j.Logger;

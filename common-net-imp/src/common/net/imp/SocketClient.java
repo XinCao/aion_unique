@@ -1,4 +1,4 @@
-package common.net.imp.network;
+package common.net.imp;
 
 import java.io.BufferedReader;
 import java.io.IOException;

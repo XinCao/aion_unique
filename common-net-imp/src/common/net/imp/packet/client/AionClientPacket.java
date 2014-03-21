@@ -1,8 +1,8 @@
-package common.net.imp.network.packet.client;
+package common.net.imp.packet.client;
 
 import com.aionemu.commons.network.packet.BaseClientPacket;
-import common.net.imp.network.core.AionConnection;
-import common.net.imp.network.packet.server.AionServerPacket;
+import common.net.imp.core.AionConnection;
+import common.net.imp.packet.server.AionServerPacket;
 
 import java.nio.ByteBuffer;
 import org.apache.log4j.Logger;

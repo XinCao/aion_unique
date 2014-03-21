@@ -1,4 +1,4 @@
-package common.net.imp.network.util;
+package common.net.imp.util;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;

@@ -1,4 +1,4 @@
-package common.net.imp.network.core;
+package common.net.imp.core;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;

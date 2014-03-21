@@ -1,7 +1,7 @@
-package common.net.imp.network.packet.server;
+package common.net.imp.packet.server;
 
 import com.aionemu.commons.network.packet.BaseServerPacket;
-import common.net.imp.network.core.AionConnection;
+import common.net.imp.core.AionConnection;
 import java.nio.ByteBuffer;
 
 public abstract class AionServerPacket extends BaseServerPacket {

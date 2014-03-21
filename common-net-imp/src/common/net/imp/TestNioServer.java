@@ -1,8 +1,8 @@
-package common.net.imp.network;
+package common.net.imp;
 
-import common.net.imp.network.core.IOServer;
-import common.net.imp.network.util.DeadLockDetector;
-import common.net.imp.network.util.ThreadPoolManager;
+import common.net.imp.core.IOServer;
+import common.net.imp.util.DeadLockDetector;
+import common.net.imp.util.ThreadPoolManager;
 
 /**
  *
