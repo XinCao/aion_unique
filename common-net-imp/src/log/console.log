@@ -1,0 +1,2 @@
+[INFO 2014-03-24 10:42:51] com.aionemu.commons.database.DatabaseFactory:115 - Successfully connected to database
+[INFO 2014-03-24 10:42:52] com.aionemu.commons.database.dao.DAOManager:61 - Loaded 1 DAO implementations.

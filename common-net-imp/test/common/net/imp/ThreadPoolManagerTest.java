@@ -1,4 +1,4 @@
-package common.net.imp.network.util;
+package common.net.imp;
 
 import common.net.imp.util.ThreadPoolManager;
 import com.aionemu.commons.network.DisconnectionTask;
