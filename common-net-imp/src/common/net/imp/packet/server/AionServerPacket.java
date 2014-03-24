@@ -11,8 +11,15 @@ public abstract class AionServerPacket extends BaseServerPacket {
     }
 
     public final void write(AionConnection con, ByteBuffer buf) {
+        int startPosition = buf.position();
         buf.putShort((short) 0);
+        buf.put((byte) getOpcode());
         this.writeImpl(con, buf);
+        int endPosition = buf.position();
+        short size = (short) (endPosition - startPosition);
+        buf.position(startPosition);
+        buf.putShort(size);
+        buf.position(endPosition);
         buf.flip();
     }
 
