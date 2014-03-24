@@ -1,4 +1,4 @@
-package common.net.imp;
+package common.net;
 
 import common.net.imp.core.IOServer;
 import common.net.imp.util.DeadLockDetector;
