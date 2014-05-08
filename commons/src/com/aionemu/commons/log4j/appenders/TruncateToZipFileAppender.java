@@ -77,11 +77,10 @@ public class TruncateToZipFileAppender extends FileAppender {
      * fileName.
      */
     @Override
-    public void setFile(String fileName, boolean append, boolean bufferedIO, int bufferSize) throws IOException {
+    public synchronized void setFile(String fileName, boolean append, boolean bufferedIO, int bufferSize) throws IOException {
         if (!append) {
             truncate(new File(fileName));
         }
-
         super.setFile(fileName, append, bufferedIO, bufferSize);
     }
 
@@ -97,64 +96,55 @@ public class TruncateToZipFileAppender extends FileAppender {
         // that log files
         // were not modified manually after server starup
         // We can use here Windowns-only solution but that suck :(
-        if (FileUtils.isFileOlder(file, ManagementFactory.getRuntimeMXBean().getStartTime())) {
-            File backupRoot = new File(getBackupDir());
-            if (!backupRoot.exists() && !backupRoot.mkdirs()) {
-                throw new AppenderInitializationError("Can't create backup dir for backup storage");
+        if (!FileUtils.isFileOlder(file, ManagementFactory.getRuntimeMXBean().getStartTime())) { // 判断文件是否是java虚拟机启动前创建的
+            return;
+        }
+        File backupRoot = new File(getBackupDir());
+        if (!backupRoot.exists() && !backupRoot.mkdirs()) {
+            throw new AppenderInitializationError("Can't create backup dir for backup storage");
+        }
+        SimpleDateFormat df;
+        try {
+            df = new SimpleDateFormat(getBackupDateFormat());
+        } catch (Exception e) {
+            throw new AppenderInitializationError("Invalid date formate for backup files: " + getBackupDateFormat(), e);
+        }
+        String date = df.format(new Date(file.lastModified()));
+        File zipFile = new File(backupRoot, file.getName() + "." + date + ".zip");
+        ZipOutputStream zos = null;
+        FileInputStream fis = null;
+        try {
+            zos = new ZipOutputStream(new FileOutputStream(zipFile));
+            ZipEntry entry = new ZipEntry(file.getName());
+            entry.setMethod(ZipEntry.DEFLATED);
+            entry.setCrc(FileUtils.checksumCRC32(file));
+            zos.putNextEntry(entry);
+            fis = FileUtils.openInputStream(file);
+            byte[] buffer = new byte[1024];
+            int readed;
+            while ((readed = fis.read(buffer)) != -1) {
+                zos.write(buffer, 0, readed);
             }
-
-            SimpleDateFormat df;
-            try {
-                df = new SimpleDateFormat(getBackupDateFormat());
-            } catch (Exception e) {
-                throw new AppenderInitializationError(
-                        "Invalid date formate for backup files: " + getBackupDateFormat(), e);
-            }
-            String date = df.format(new Date(file.lastModified()));
-
-            File zipFile = new File(backupRoot, file.getName() + "." + date + ".zip");
-
-            ZipOutputStream zos = null;
-            FileInputStream fis = null;
-            try {
-                zos = new ZipOutputStream(new FileOutputStream(zipFile));
-                ZipEntry entry = new ZipEntry(file.getName());
-                entry.setMethod(ZipEntry.DEFLATED);
-                entry.setCrc(FileUtils.checksumCRC32(file));
-                zos.putNextEntry(entry);
-                fis = FileUtils.openInputStream(file);
-
-                byte[] buffer = new byte[1024];
-                int readed;
-                while ((readed = fis.read(buffer)) != -1) {
-                    zos.write(buffer, 0, readed);
-                }
-
-            } catch (Exception e) {
-                throw new AppenderInitializationError("Can't create zip file", e);
-            } finally {
-                if (zos != null) {
-                    try {
-                        zos.close();
-                    } catch (IOException e) {
-                        // not critical error
-                        LogLog.warn("Can't close zip file", e);
-                    }
-                }
-
-                if (fis != null) {
-                    try {
-                        // not critical error
-                        fis.close();
-                    } catch (IOException e) {
-                        LogLog.warn("Can't close zipped file", e);
-                    }
+        } catch (IOException e) {
+            throw new AppenderInitializationError("Can't create zip file", e);
+        } finally {
+            if (zos != null) {
+                try {
+                    zos.close();
+                } catch (IOException e) {
+                    LogLog.warn("Can't close zip file", e);
                 }
             }
-
-            if (!file.delete()) {
-                throw new AppenderInitializationError("Can't delete old log file " + file.getAbsolutePath());
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    LogLog.warn("Can't close zipped file", e);
+                }
             }
+        }
+        if (!file.delete()) {
+            throw new AppenderInitializationError("Can't delete old log file " + file.getAbsolutePath());
         }
     }
 

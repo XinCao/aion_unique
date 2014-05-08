@@ -5,12 +5,8 @@
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
             <name>loginserver</name>
             <source-roots>
-                <root id="src.bat.dir"/>
-                <root id="src.data.dir"/>
-                <root id="src.log.dir"/>
-                <root id="src.test.dir"/>
-                <root id="src.config.dir"/>
                 <root id="src.src.dir"/>
+                <root id="src.resources.dir"/>
             </source-roots>
             <test-roots/>
         </data>

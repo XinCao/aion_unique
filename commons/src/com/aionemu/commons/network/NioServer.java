@@ -7,7 +7,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
-import com.aionemu.commons.options.Assertion;
 
 public class NioServer {
 

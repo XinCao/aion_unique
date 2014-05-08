@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 
 /**
  * @方法性能分析
- * 
+ *
  */
 @SuppressWarnings("unchecked")
 public final class RunnableStatsManager {
@@ -69,10 +69,10 @@ public final class RunnableStatsManager {
 
         /**
          * 挺有趣的解决线程安全问题
-         * 
+         *
          * @param methodName
          * @param synchronizedAlready
-         * @return 
+         * @return
          */
         private MethodStat getMethodStat(String methodName, boolean synchronizedAlready) {
             // method names will be interned automatically because of compiling, so this gonna work
@@ -274,14 +274,15 @@ public final class RunnableStatsManager {
             if (sortBy != null) {
                 switch (sortBy) {
                     case NAME: {
-                        
-                    } case METHOD: {
+                    }
+                    case METHOD: {
                         appendAttribute(sb, SortBy.NAME, values[SortBy.NAME.ordinal()][k], maxLength[SortBy.NAME.ordinal()]);
                         set.remove(SortBy.NAME);
                         appendAttribute(sb, SortBy.METHOD, values[SortBy.METHOD.ordinal()][k], maxLength[SortBy.METHOD.ordinal()]);
                         set.remove(SortBy.METHOD);
                         break;
-                    } default: {
+                    }
+                    default: {
                         appendAttribute(sb, sortBy, values[sortBy.ordinal()][k], maxLength[sortBy.ordinal()]);
                         set.remove(sortBy);
                         break;
@@ -301,8 +302,7 @@ public final class RunnableStatsManager {
         try {
             ps = new PrintStream("MethodStats-" + System.currentTimeMillis() + ".log");
             for (String line : lines) {
-//                ps.println(line);
-                System.out.println(line);
+                ps.println(line);
             }
         } catch (Exception e) {
             log.warn("", e);
@@ -328,12 +328,18 @@ public final class RunnableStatsManager {
             }
         }
     }
-    
-    public static void main(String ...args) {
-        handleStats(RunnableStatsManager.class, "runA()", 1);
-        handleStats(RunnableStatsManager.class, "runA()", 2);
-        handleStats(RunnableStatsManager.class, "runA()", 3);
-        handleStats(RunnableStatsManager.class, "runA()", 4);
+
+    public static void main(String... args) {
+        test();
         dumpClassStats(null);
+    }
+
+    private static void test() {
+        long startTime = System.currentTimeMillis();
+        int loop = 1000;
+        while (loop-- > 0) {
+            System.out.println(loop);
+        }
+        handleStats(RunnableStatsManager.class, "test()", System.currentTimeMillis() - startTime);
     }
 }
